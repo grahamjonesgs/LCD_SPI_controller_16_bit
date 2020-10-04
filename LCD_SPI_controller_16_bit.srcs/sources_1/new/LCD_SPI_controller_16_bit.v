@@ -57,6 +57,7 @@ module LCD_SPI_controller_16_bit(
    
    reg [15:0] r_register[7:0];
    reg        r_zero_flag;
+   reg        r_equal_flag;
    
    SPI_Master_With_Single_CS SPI_Master_With_Single_CS_inst (
    .i_Rst_L(~i_Rst_H),     // FPGA Reset
@@ -108,7 +109,8 @@ module LCD_SPI_controller_16_bit(
     `include "timing_tasks.vh" 
     `include "LCD_tasks.vh" 
     `include "led_tasks.vh"  
-    `include "register_tasks.vh"         
+    `include "register_tasks.vh" 
+    `include "control_tasks.vh"         
     
     initial
     begin
@@ -163,17 +165,17 @@ module LCD_SPI_controller_16_bit(
                     16'h2003: t_delay(w_var1);
                     16'h2004: t_led_state(w_var1[0]);
                     16'h2005: t_lcd_reset(w_var1[0]);
-                    16'h010?: t_set_reg(w_var1);
                     
-                    16'h011?: t_inc_reg(w_var1);
+                    16'h010?: t_set_reg(w_var1);       
+                    16'h011?: t_inc_value_reg(w_var1);
+                    16'h012?: t_dec_value_reg(w_var1);
+                    16'h013?: t_compare_reg(w_var1);
+                    16'h014?: t_inc_reg;
+                    16'h015?: t_dec_reg;
                     
-                    16'h012?: t_dec_reg(w_var1);
-                    
-                    16'h020?: t_cond_zero_rel_jump(w_var1);
-                    //16'h0200: t_jump_if_zero_forward(w_var1);
-                    //16'h0201: t_jump_if_zero_backwards(w_var1);
-                    //16'h0202: t_jump_if_not_zero_forward(w_var1);
-                    //16'h0203: t_jump_if_not_zero_backwards(w_var1);
+                    16'b0000_0010_0000_00??: t_cond_zero_rel_jump(w_var1); // 0200 - 0203                    
+                    16'b0000_0010_0000_01??: t_cond_equal_rel_jump(w_var1); // 0204 - 0207
+               
                     16'hFFFF: 
                     begin
                         r_SM_msg<=r_SM_msg+1;  
@@ -182,7 +184,7 @@ module LCD_SPI_controller_16_bit(
                     default: 
                     begin
                         r_SM_msg<=0; 
-                        r_PC<= r_PC+1;
+                        r_PC<= 0;  // Halt and catch fire.
                     end
                 endcase
                 end

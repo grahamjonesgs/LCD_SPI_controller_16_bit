@@ -94,18 +94,8 @@
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PSRCDIR/sources_1/new/register_tasks.vh">
+      <File Path="$PSRCDIR/sources_1/new/control_tasks.vh">
         <FileInfo>
-          <Attr Name="ImportPath" Val="$PPRDIR/../Verilog_projects/ram_lcd_spi_test/ram_lcd_spi_test.srcs/sources_1/new/register_tasks.vh"/>
-          <Attr Name="ImportTime" Val="1601669105"/>
-          <Attr Name="UsedIn" Val="synthesis"/>
-          <Attr Name="UsedIn" Val="simulation"/>
-        </FileInfo>
-      </File>
-      <File Path="$PSRCDIR/sources_1/new/led_tasks.vh">
-        <FileInfo>
-          <Attr Name="ImportPath" Val="$PPRDIR/../Verilog_projects/ram_lcd_spi_test/ram_lcd_spi_test.srcs/sources_1/new/led_tasks.vh"/>
-          <Attr Name="ImportTime" Val="1601667570"/>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
@@ -122,6 +112,22 @@
         <FileInfo>
           <Attr Name="ImportPath" Val="$PPRDIR/../Verilog_projects/ram_lcd_spi_test/ram_lcd_spi_test.srcs/sources_1/new/timing_tasks.vh"/>
           <Attr Name="ImportTime" Val="1601667706"/>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PSRCDIR/sources_1/new/led_tasks.vh">
+        <FileInfo>
+          <Attr Name="ImportPath" Val="$PPRDIR/../Verilog_projects/ram_lcd_spi_test/ram_lcd_spi_test.srcs/sources_1/new/led_tasks.vh"/>
+          <Attr Name="ImportTime" Val="1601667570"/>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PSRCDIR/sources_1/new/register_tasks.vh">
+        <FileInfo>
+          <Attr Name="ImportPath" Val="$PPRDIR/../Verilog_projects/ram_lcd_spi_test/ram_lcd_spi_test.srcs/sources_1/new/register_tasks.vh"/>
+          <Attr Name="ImportTime" Val="1601669105"/>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
@@ -183,7 +189,7 @@
       <File Path="$PSRCDIR/utils_1/imports/synth_1/LCD_SPI_controller_16_bit.dcp">
         <FileInfo>
           <Attr Name="ImportPath" Val="$PRUNDIR/synth_1/LCD_SPI_controller_16_bit.dcp"/>
-          <Attr Name="ImportTime" Val="1601831801"/>
+          <Attr Name="ImportTime" Val="1601843823"/>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedInSteps" Val="synth_1"/>
@@ -193,7 +199,7 @@
       <File Path="$PSRCDIR/utils_1/imports/impl_1/LCD_SPI_controller_16_bit_routed.dcp">
         <FileInfo>
           <Attr Name="ImportPath" Val="$PRUNDIR/impl_1/LCD_SPI_controller_16_bit_routed.dcp"/>
-          <Attr Name="ImportTime" Val="1601831800"/>
+          <Attr Name="ImportTime" Val="1601843823"/>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedInSteps" Val="impl_1"/>
