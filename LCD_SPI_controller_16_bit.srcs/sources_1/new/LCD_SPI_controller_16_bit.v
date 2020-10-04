@@ -55,9 +55,7 @@ module LCD_SPI_controller_16_bit(
    
    //reg [15:0] r_instruction; 
    
-   reg [15:0] r_register_a;
-   reg [15:0] r_register_b;
-   reg [15:0] r_register_c;
+   reg [15:0] r_register[7:0];
    reg        r_zero_flag;
    
    SPI_Master_With_Single_CS SPI_Master_With_Single_CS_inst (
@@ -97,14 +95,14 @@ module LCD_SPI_controller_16_bit(
    .probe4(e_ram_enable),
    .probe5(o_TX_LCD_Byte),
    .probe6(8'b0),
-   .probe7(r_register_a),
+   .probe7(r_register[0]),
    .probe8(o_SPI_LCD_Clk),
    .probe9(i_SPI_LCD_MISO),
    .probe10(o_SPI_LCD_MOSI),
    .probe11(o_SPI_LCD_CS_n),
    .probe12(o_LCD_DC),
    .probe13(o_LCD_reset_n),
-   .probe14(r_flags),
+   .probe14(r_zero_flag),
    .probe15(1'b0));
      
     `include "timing_tasks.vh" 
@@ -126,9 +124,6 @@ module LCD_SPI_controller_16_bit(
         r_SM_msg=0;
         r_timeout_counter=0;
         o_LCD_reset_n=1'b0; 
-        r_register_a=16'h0;
-        r_register_b=16'h0;
-        r_register_c=16'h0;
         r_PC=16'h0;
         r_zero_flag=0;
     end
@@ -142,9 +137,6 @@ module LCD_SPI_controller_16_bit(
             r_SM_msg=0;
             r_timeout_counter=0;
             o_LCD_reset_n=1'b0; 
-            r_register_a=16'h0;
-            r_register_b=16'h0;
-            r_register_c=16'h0;
             r_PC=16'h0;
             r_zero_flag=0;
         end // if (i_Rst_H)
@@ -160,28 +152,28 @@ module LCD_SPI_controller_16_bit(
                 begin
                     e_ram_enable<=0;
                     r_SM_msg=r_SM_msg+1;
-                end
-                2: 
-                begin
-                    //r_instruction<=w_instruction;
-                    r_SM_msg=r_SM_msg+1;
                 end  
-                3:
+                2:
                 begin
-                    case(w_opcode[15:0])
+                    //e_ram_enable<=0;
+                    casez(w_opcode[15:0])
                     
                     16'h2001: spi_dc_write_command(w_var1);
                     16'h2002: spi_dc_write_data(w_var1);
                     16'h2003: t_delay(w_var1);
                     16'h2004: t_led_state(w_var1[0]);
                     16'h2005: t_lcd_reset(w_var1[0]);
-                    16'h0110: t_set_reg_a(w_var1);
-                    16'h0111: t_inc_reg_a(w_var1);
-                    16'h0112: t_dec_reg_a(w_var1);
-                    16'h0113: t_jump_if_zero_forward(w_var1);
-                    16'h0114: t_jump_if_zero_backwards(w_var1);
-                    16'h0115: t_jump_if_not_zero_forward(w_var1);
-                    16'h0116: t_jump_if_not_zero_backwards(w_var1);
+                    16'h010?: t_set_reg(w_var1);
+                    
+                    16'h011?: t_inc_reg(w_var1);
+                    
+                    16'h012?: t_dec_reg(w_var1);
+                    
+                    16'h020?: t_cond_zero_rel_jump(w_var1);
+                    //16'h0200: t_jump_if_zero_forward(w_var1);
+                    //16'h0201: t_jump_if_zero_backwards(w_var1);
+                    //16'h0202: t_jump_if_not_zero_forward(w_var1);
+                    //16'h0203: t_jump_if_not_zero_backwards(w_var1);
                     16'hFFFF: 
                     begin
                         r_SM_msg<=r_SM_msg+1;  
