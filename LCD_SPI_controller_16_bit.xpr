@@ -67,6 +67,13 @@
   <FileSets Version="1" Minor="31">
     <FileSet Name="sources_1" Type="DesignSrcs" RelSrcDir="$PSRCDIR/sources_1">
       <Filter Type="Srcs"/>
+      <File Path="$PSRCDIR/sources_1/new/LED_Display_Controller.v">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="implementation"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
       <File Path="$PSRCDIR/sources_1/imports/new/SPI_Master.v">
         <FileInfo>
           <Attr Name="ImportPath" Val="$PPRDIR/../Verilog_projects/spi_lcd_data/spi_lcd_data.srcs/sources_1/new/SPI_Master.v"/>
@@ -189,7 +196,7 @@
       <File Path="$PSRCDIR/utils_1/imports/synth_1/LCD_SPI_controller_16_bit.dcp">
         <FileInfo>
           <Attr Name="ImportPath" Val="$PRUNDIR/synth_1/LCD_SPI_controller_16_bit.dcp"/>
-          <Attr Name="ImportTime" Val="1601919875"/>
+          <Attr Name="ImportTime" Val="1601926781"/>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedInSteps" Val="synth_1"/>
@@ -199,7 +206,7 @@
       <File Path="$PSRCDIR/utils_1/imports/impl_1/LCD_SPI_controller_16_bit_routed.dcp">
         <FileInfo>
           <Attr Name="ImportPath" Val="$PRUNDIR/impl_1/LCD_SPI_controller_16_bit_routed.dcp"/>
-          <Attr Name="ImportTime" Val="1601919874"/>
+          <Attr Name="ImportTime" Val="1601926781"/>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedInSteps" Val="impl_1"/>

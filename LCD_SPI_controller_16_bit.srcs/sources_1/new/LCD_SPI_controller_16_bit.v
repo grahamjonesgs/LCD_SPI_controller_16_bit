@@ -19,7 +19,7 @@
 // Additional Comments:
 // 
 //////////////////////////////////////////////////////////////////////////////////
-   
+    
      
 module LCD_SPI_controller_16_bit(
    input        i_Rst_H,     // FPGA Reset
@@ -30,7 +30,9 @@ module LCD_SPI_controller_16_bit(
    output       o_SPI_LCD_MOSI,
    output       o_SPI_LCD_CS_n,
    output   reg o_LCD_DC,
-   output   reg o_LCD_reset_n
+   output   reg o_LCD_reset_n,
+   output      [3:0]   o_Anode_Activate, // anode signals of the 7-segment LED display
+   output      [7:0]   o_LED_cathode// cathode patterns of the 7-segment LED display
     );
     
    reg [3:0]  o_TX_LCD_Count;  // # bytes per CS low
@@ -53,11 +55,20 @@ module LCD_SPI_controller_16_bit(
    wire [15:0] w_var1;
    wire [15:0] w_var2;
    
-   //reg [15:0] r_instruction; 
-   
    reg [15:0] r_register[7:0];
    reg        r_zero_flag;
    reg        r_equal_flag;
+   
+   reg [31:0] r_seven_seg_value;
+   
+   Seven_seg_LED_Display_Controller Seven_seg_LED_Display_Controller1 (
+    .i_sysclk(i_Clk),
+    .i_reset(i_Rst_H), 
+    .i_displayed_number(r_seven_seg_value), // Number to display
+    .o_Anode_Activate(o_Anode_Activate), 
+    .o_LED_cathode(o_LED_cathode)
+    );
+    
    
    SPI_Master_With_Single_CS SPI_Master_With_Single_CS_inst (
    .i_Rst_L(~i_Rst_H),     // FPGA Reset
@@ -117,6 +128,7 @@ module LCD_SPI_controller_16_bit(
         r_SM_msg=15'b0;
         r_PC<=15'b0;
         r_timeout_counter=32'b0;
+        r_seven_seg_value=32'h20_10_00_01;
     end
     
     initial
@@ -175,7 +187,7 @@ module LCD_SPI_controller_16_bit(
                     
                     16'b0000_0010_0000_00??: t_cond_zero_rel_jump(w_var1); // 0200 - 0203                    
                     16'b0000_0010_0000_01??: t_cond_equal_rel_jump(w_var1); // 0204 - 0207
-               
+                
                     16'hFFFF: 
                     begin
                         r_SM_msg<=r_SM_msg+1;  
