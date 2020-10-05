@@ -19,8 +19,8 @@
 // Additional Comments:
 // 
 //////////////////////////////////////////////////////////////////////////////////
-
-    
+   
+     
 module LCD_SPI_controller_16_bit(
    input        i_Rst_H,     // FPGA Reset
    input        i_Clk,       // FPGA Clock
