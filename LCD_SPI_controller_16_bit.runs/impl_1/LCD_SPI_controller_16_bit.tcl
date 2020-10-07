@@ -172,7 +172,7 @@ set rc [catch {
 OPTRACE "read constraints: opt_design" START { }
 OPTRACE "read constraints: opt_design" END { }
 OPTRACE "opt_design" START { }
-  opt_design 
+  opt_design -directive RuntimeOptimized
 OPTRACE "opt_design" END { }
 OPTRACE "read constraints: opt_design_post" START { }
 OPTRACE "read constraints: opt_design_post" END { }
@@ -210,7 +210,7 @@ OPTRACE "implement_debug_core" START { }
 OPTRACE "implement_debug_core" END { }
   } 
 OPTRACE "place_design" START { }
-  place_design 
+  place_design -directive Quick
 OPTRACE "place_design" END { }
 OPTRACE "read constraints: place_design_post" START { }
 OPTRACE "read constraints: place_design_post" END { }
@@ -233,34 +233,6 @@ if {$rc} {
 }
 
 OPTRACE "Phase: Place Design" END { }
-OPTRACE "Phase: Physical Opt Design" START { ROLLUP_AUTO }
-start_step phys_opt_design
-set ACTIVE_STEP phys_opt_design
-set rc [catch {
-  create_msg_db phys_opt_design.pb
-OPTRACE "read constraints: phys_opt_design" START { }
-OPTRACE "read constraints: phys_opt_design" END { }
-OPTRACE "phys_opt_design" START { }
-  phys_opt_design 
-OPTRACE "phys_opt_design" END { }
-OPTRACE "read constraints: phys_opt_design_post" START { }
-OPTRACE "read constraints: phys_opt_design_post" END { }
-OPTRACE "Post-Place Phys Opt Design: write_checkpoint" START { CHECKPOINT }
-  write_checkpoint -force LCD_SPI_controller_16_bit_physopt.dcp
-OPTRACE "Post-Place Phys Opt Design: write_checkpoint" END { }
-OPTRACE "phys_opt_design report" START { REPORT }
-OPTRACE "phys_opt_design report" END { }
-  close_msg_db -file phys_opt_design.pb
-} RESULT]
-if {$rc} {
-  step_failed phys_opt_design
-  return -code error $RESULT
-} else {
-  end_step phys_opt_design
-  unset ACTIVE_STEP 
-}
-
-OPTRACE "Phase: Physical Opt Design" END { }
 OPTRACE "Phase: Route Design" START { ROLLUP_AUTO }
 start_step route_design
 set ACTIVE_STEP route_design
@@ -269,7 +241,7 @@ set rc [catch {
 OPTRACE "read constraints: route_design" START { }
 OPTRACE "read constraints: route_design" END { }
 OPTRACE "route_design" START { }
-  route_design 
+  route_design -directive Quick
 OPTRACE "route_design" END { }
 OPTRACE "read constraints: route_design_post" START { }
 OPTRACE "read constraints: route_design_post" END { }

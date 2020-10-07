@@ -129,7 +129,7 @@ read_checkpoint -auto_incremental -incremental /home/graham/Documents/LCD_SPI_co
 close [open __synthesis_is_running__ w]
 
 OPTRACE "synth_design" START { }
-synth_design -top LCD_SPI_controller_16_bit -part xc7a35tcpg236-1
+synth_design -top LCD_SPI_controller_16_bit -part xc7a35tcpg236-1 -bufg 13
 OPTRACE "synth_design" END { }
 
 
