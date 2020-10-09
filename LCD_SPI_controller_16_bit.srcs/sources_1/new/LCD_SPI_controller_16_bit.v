@@ -182,6 +182,9 @@ module LCD_SPI_controller_16_bit(
                     16'h2004: t_led_state(w_var1[0]);
                     16'h2005: t_lcd_reset(w_var1[0]);
                     
+                    16'h201?: spi_dc_write_command_reg;
+                    16'h202?: spi_dc_data_command_reg;
+                    
                     16'h010?: t_set_reg(w_var1);       
                     16'h011?: t_inc_value_reg(w_var1);
                     16'h012?: t_dec_value_reg(w_var1);
@@ -192,6 +195,9 @@ module LCD_SPI_controller_16_bit(
                     
                     16'b0000_0010_0000_00??: t_cond_zero_rel_jump(w_var1); // 0200 - 0203                    
                     16'b0000_0010_0000_01??: t_cond_equal_rel_jump(w_var1); // 0204 - 0207
+                    
+                    16'b0000_0010_0000_100?: t_cond_zero_jump(w_var1); // 0208 - 0209   
+                    16'b0000_0010_0000_101?: t_cond_equal_jump(w_var1); // 020A - 020B   
                 
                     16'hFFFF: 
                     begin
