@@ -198,6 +198,7 @@ module LCD_SPI_controller_16_bit(
                     
                     16'b0000_0010_0000_100?: t_cond_zero_jump(w_var1); // 0208 - 0209   
                     16'b0000_0010_0000_101?: t_cond_equal_jump(w_var1); // 020A - 020B   
+                    16'h0210: t_jump(w_var1);
                 
                     16'hFFFF: 
                     begin
