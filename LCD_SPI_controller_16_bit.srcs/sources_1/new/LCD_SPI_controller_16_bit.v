@@ -184,6 +184,7 @@ module LCD_SPI_controller_16_bit(
                     
                     16'h201?: spi_dc_write_command_reg;
                     16'h202?: spi_dc_data_command_reg;
+                    16'h203?: t_delay_reg;
                     
                     16'h010?: t_set_reg(w_var1);       
                     16'h011?: t_inc_value_reg(w_var1);
