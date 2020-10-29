@@ -209,7 +209,7 @@
       <File Path="$PSRCDIR/utils_1/imports/synth_1/LCD_SPI_controller_16_bit.dcp">
         <FileInfo>
           <Attr Name="ImportPath" Val="$PRUNDIR/synth_1/LCD_SPI_controller_16_bit.dcp"/>
-          <Attr Name="ImportTime" Val="1603994802"/>
+          <Attr Name="ImportTime" Val="1604003084"/>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedInSteps" Val="synth_1"/>
@@ -219,7 +219,7 @@
       <File Path="$PSRCDIR/utils_1/imports/impl_1/LCD_SPI_controller_16_bit_routed.dcp">
         <FileInfo>
           <Attr Name="ImportPath" Val="$PRUNDIR/impl_1/LCD_SPI_controller_16_bit_routed.dcp"/>
-          <Attr Name="ImportTime" Val="1602344387"/>
+          <Attr Name="ImportTime" Val="1604003084"/>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedInSteps" Val="impl_1"/>
@@ -321,8 +321,8 @@
         </ReportConfig>
         <ReportConfig DisplayName="DRC - Opt Design" Name="impl_1_opt_report_drc_0" Spec="report_drc" RunStep="opt_design" ReportFile="LCD_SPI_controller_16_bit_drc_opted.rpt" Version="1" Minor="0">
           <ReportConfigOption Name="dummy_option" Type="string"/>
-          <ReportConfigOutputOption Name="pb" Type="string" Value=""/>
-          <ReportConfigOutputOption Name="rpx" Type="string" Value=""/>
+          <ReportConfigOutputOption Name="pb" Type="string" Value="LCD_SPI_controller_16_bit_drc_opted.pb"/>
+          <ReportConfigOutputOption Name="rpx" Type="string" Value="LCD_SPI_controller_16_bit_drc_opted.rpx"/>
         </ReportConfig>
         <ReportConfig DisplayName="Timing Summary - Opt Design" Name="impl_1_opt_report_timing_summary_0" Spec="report_timing_summary" RunStep="opt_design" Version="1" Minor="0" IsDisabled="true">
           <ReportConfigOption Name="max_paths" Type="" Value="10"/>
