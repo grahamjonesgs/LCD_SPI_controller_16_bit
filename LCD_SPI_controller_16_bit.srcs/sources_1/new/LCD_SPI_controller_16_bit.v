@@ -19,7 +19,7 @@
 // Additional Comments:
 // 
 //////////////////////////////////////////////////////////////////////////////////
-    
+      
      
 module LCD_SPI_controller_16_bit(
    input        i_Rst_H,     // FPGA Reset
@@ -34,6 +34,10 @@ module LCD_SPI_controller_16_bit(
    output      [3:0]   o_Anode_Activate, // anode signals of the 7-segment LED display
    output      [7:0]   o_LED_cathode// cathode patterns of the 7-segment LED display
     );
+    
+   parameter STACK_SIZE=1024;
+   parameter OPCODE_REQUEST=4'h0, OPCODE_FETCH=4'h1, OPCODE_EXECUTE=4'h2, HCF_1=4'h3,HCF_2=4'h4,  HCF_3=4'h5, HCF_4=4'h6;
+   parameter ERR_INV_OPCODE=8'h1, ERR_INV_FSM_STATE=8'h2, ERR_STACK=8'h3;
     
    reg [3:0]  o_TX_LCD_Count;  // # bytes per CS low
    reg [7:0]  o_TX_LCD_Byte;       // Byte to transmit on MOSI
@@ -62,8 +66,26 @@ module LCD_SPI_controller_16_bit(
    
    reg [31:0] r_seven_seg_value;
    
-   parameter OPCODE_REQUEST=4'h0, OPCODE_FETCH=4'h1, OPCODE_EXECUTE=4'h2, HCF_1=4'h3,HCF_2=4'h4,  HCF_3=4'h5, HCF_4=4'h6;
-   parameter ERR_INV_OPCODE=8'h1, ERR_INV_FSM_STATE=8'h2; 
+   reg [15:0] r_stack[STACK_SIZE-1:0];
+   //reg [15:0] r_SP;
+   
+   wire [15:0] i_stack_top_value;
+   wire        i_stack_error;
+   reg         o_stack_read_flag;
+   reg         o_stack_write_flag;
+   reg  [15:0] o_stack_write_value;
+   
+   reg [15:0] r_check_number;
+
+ stack main_stack (
+.clk(i_Clk),
+.i_reset(i_Rst_H),
+.i_read_flag(o_stack_read_flag),
+.i_write_flag(o_stack_write_flag),
+.i_write_value(o_stack_write_value),
+.o_stack_top_value(i_stack_top_value),
+.o_stack_error(i_stack_error));
+   
    Seven_seg_LED_Display_Controller Seven_seg_LED_Display_Controller1 (
     .i_sysclk(i_Clk),
     .i_reset(i_Rst_H), 
@@ -104,10 +126,10 @@ module LCD_SPI_controller_16_bit(
 
    ila_0  myila(.clk(i_Clk),
    .probe0(w_opcode),
-   .probe1(r_timeout_counter),
+   .probe1(r_check_number),
    .probe2(r_PC),
    .probe3(r_SM_msg),
-   .probe4(e_ram_enable),
+   .probe4(r_SM_msg),
    .probe5(o_TX_LCD_Byte),
    .probe6(8'b0),
    .probe7(r_register[0]),
@@ -124,14 +146,9 @@ module LCD_SPI_controller_16_bit(
     `include "LCD_tasks.vh" 
     `include "led_tasks.vh"  
     `include "register_tasks.vh" 
-    `include "control_tasks.vh"         
+    `include "control_tasks.vh"     
+    `include "stack_tasks.vh"     
     
-    initial
-    begin
-        r_PC<=15'b0;
-        r_timeout_counter=32'b0;
-        r_seven_seg_value=32'h20_10_00_01;
-    end
     
     initial
     begin
@@ -143,6 +160,9 @@ module LCD_SPI_controller_16_bit(
         r_PC=16'h0;
         r_zero_flag=0;
         r_error_code=8'h0;
+        //r_SP=0;
+        r_timeout_counter=32'b0;
+        r_seven_seg_value=32'h20_10_00_01;
     end
     
     always @(posedge i_Clk)
@@ -157,14 +177,25 @@ module LCD_SPI_controller_16_bit(
             r_PC=16'h0;
             r_zero_flag=0;
             r_error_code=8'h0;
+            //r_SP=0;
         end // if (i_Rst_H)
         else
         begin
             case(r_SM_msg)               
                 OPCODE_REQUEST: 
                 begin
-                    e_ram_enable<=1;
-                    r_SM_msg<=OPCODE_FETCH;
+                o_stack_write_flag<=1'b0;
+                o_stack_read_flag<=1'b0;
+                if(i_stack_error) 
+                    begin
+                        r_SM_msg<=HCF_1; // Halt and catch fire error 1 
+                        r_error_code<=ERR_STACK;
+                    end // default case
+                    else
+                    begin
+                        e_ram_enable<=1;
+                        r_SM_msg<=OPCODE_FETCH;
+                    end
                 end 
                 OPCODE_FETCH: 
                 begin
@@ -185,14 +216,14 @@ module LCD_SPI_controller_16_bit(
                     16'h201?: spi_dc_write_command_reg;
                     16'h202?: spi_dc_data_command_reg;
                     16'h203?: t_delay_reg;
-                    
+                     
                     16'h010?: t_set_reg(w_var1);       
                     16'h011?: t_inc_value_reg(w_var1);
                     16'h012?: t_dec_value_reg(w_var1);
                     16'h013?: t_compare_reg(w_var1);
                     16'h014?: t_inc_reg;
                     16'h015?: t_dec_reg;
-                    16'h03??: t_copy_reg;
+                    16'h04??: t_copy_reg;
                     
                     16'b0000_0010_0000_00??: t_cond_zero_rel_jump(w_var1); // 0200 - 0203                    
                     16'b0000_0010_0000_01??: t_cond_equal_rel_jump(w_var1); // 0204 - 0207
@@ -200,6 +231,11 @@ module LCD_SPI_controller_16_bit(
                     16'b0000_0010_0000_100?: t_cond_zero_jump(w_var1); // 0208 - 0209   
                     16'b0000_0010_0000_101?: t_cond_equal_jump(w_var1); // 020A - 020B   
                     16'h0210: t_jump(w_var1);
+                    
+                    16'h0300: t_stack_push_value(w_var1);
+                    16'h031?: t_stack_push_reg;
+                    16'h032?: t_stack_pop_reg;
+                     
                 
                     16'hFFFF: 
                     begin
@@ -215,13 +251,15 @@ module LCD_SPI_controller_16_bit(
                 end // case OPCODE_EXECUTE
                 HCF_1:               
                 begin
+                    o_stack_write_flag<=1'b0;
+                    o_stack_read_flag<=1'b0;
                     r_timeout_counter<=0;
                     r_SM_msg<=HCF_2;
                 end
                 HCF_2:  
                 begin 
                     r_seven_seg_value[31:8]<=24'h230C0F;  
-                    r_seven_seg_value[7:0]<=ERR_INV_OPCODE;
+                    r_seven_seg_value[7:0]<=r_error_code;
                     r_timeout_max<=32'd100_000_000;
                     if(r_timeout_counter>=r_timeout_max)  
                     begin 
