@@ -73,17 +73,14 @@ OPTRACE "synth_1" START { ROLLUP_AUTO }
 set_param tcl.collectionResultDisplayLimit 0
 set_param xicom.use_bs_reader 1
 set_param chipscope.maxJobs 1
-set_msg_config -id {Common 17-41} -limit 10000000
 OPTRACE "Creating in-memory project" START { }
 create_project -in_memory -part xc7a35tcpg236-1
 
 set_param project.singleFileAddWarning.threshold 0
 set_param project.compositeFile.enableAutoGeneration 0
 set_param synth.vivado.isSynthRun true
-set_msg_config -source 4 -id {IP_Flow 19-2162} -severity warning -new_severity info
 set_property webtalk.parent_dir /home/graham/Documents/LCD_SPI_controller_16_bit/LCD_SPI_controller_16_bit.cache/wt [current_project]
 set_property parent.project_path /home/graham/Documents/LCD_SPI_controller_16_bit/LCD_SPI_controller_16_bit.xpr [current_project]
-set_property XPM_LIBRARIES {XPM_CDC XPM_MEMORY} [current_project]
 set_property default_lib xil_defaultlib [current_project]
 set_property target_language Verilog [current_project]
 set_property board_part digilentinc.com:basys3:part0:1.1 [current_project]
@@ -106,14 +103,9 @@ read_verilog -library xil_defaultlib {
   /home/graham/Documents/LCD_SPI_controller_16_bit/LCD_SPI_controller_16_bit.srcs/sources_1/imports/new/SPI_Master_With_Single_CS.v
   /home/graham/Documents/LCD_SPI_controller_16_bit/LCD_SPI_controller_16_bit.srcs/sources_1/new/ram_sp.v
   /home/graham/Documents/LCD_SPI_controller_16_bit/LCD_SPI_controller_16_bit.srcs/sources_1/new/stack.v
+  /home/graham/Documents/LCD_SPI_controller_16_bit/LCD_SPI_controller_16_bit.srcs/sources_1/new/uart_receive.v
   /home/graham/Documents/LCD_SPI_controller_16_bit/LCD_SPI_controller_16_bit.srcs/sources_1/new/LCD_SPI_controller_16_bit.v
 }
-read_ip -quiet /home/graham/Documents/LCD_SPI_controller_16_bit/LCD_SPI_controller_16_bit.srcs/sources_1/ip/ila_0/ila_0.xci
-set_property used_in_synthesis false [get_files -all /home/graham/Documents/LCD_SPI_controller_16_bit/LCD_SPI_controller_16_bit.srcs/sources_1/ip/ila_0/ila_v6_2/constraints/ila_impl.xdc]
-set_property used_in_implementation false [get_files -all /home/graham/Documents/LCD_SPI_controller_16_bit/LCD_SPI_controller_16_bit.srcs/sources_1/ip/ila_0/ila_v6_2/constraints/ila_impl.xdc]
-set_property used_in_implementation false [get_files -all /home/graham/Documents/LCD_SPI_controller_16_bit/LCD_SPI_controller_16_bit.srcs/sources_1/ip/ila_0/ila_v6_2/constraints/ila.xdc]
-set_property used_in_implementation false [get_files -all /home/graham/Documents/LCD_SPI_controller_16_bit/LCD_SPI_controller_16_bit.srcs/sources_1/ip/ila_0/ila_0_ooc.xdc]
-
 OPTRACE "Adding files" END { }
 # Mark all dcp files as not used in implementation to prevent them from being
 # stitched into the results of this synthesis run. Any black boxes in the

@@ -24,7 +24,9 @@
 module LCD_SPI_controller_16_bit(
    input        i_Rst_H,     // FPGA Reset
    input        i_Clk,       // FPGA Clock
+   input        i_uart_rx,
    output reg   o_led,
+   output reg   o_led_2,
    output       o_SPI_LCD_Clk,
    input        i_SPI_LCD_MISO,
    output       o_SPI_LCD_MOSI,
@@ -39,6 +41,11 @@ module LCD_SPI_controller_16_bit(
    parameter OPCODE_REQUEST=4'h0, OPCODE_FETCH=4'h1, OPCODE_EXECUTE=4'h2, HCF_1=4'h3,HCF_2=4'h4,  HCF_3=4'h5, HCF_4=4'h6;
    parameter ERR_INV_OPCODE=8'h1, ERR_INV_FSM_STATE=8'h2, ERR_STACK=8'h3;
     
+   // UART receive control
+   wire [7:0]    w_uart_rx_value;  // Received value
+   wire          w_uart_rx_DV;     // receive flag
+   
+   // LCD control
    reg [3:0]  o_TX_LCD_Count;  // # bytes per CS low
    reg [7:0]  o_TX_LCD_Byte;       // Byte to transmit on MOSI
    reg        o_TX_LCD_DV;         // Data Valid Pulse with i_TX_Byte
@@ -52,6 +59,7 @@ module LCD_SPI_controller_16_bit(
    reg [31:0] r_timeout_counter;
    reg [31:0] r_timeout_max;  
    
+   // Machine control
    reg [3:0] r_SM_msg;
    reg e_ram_enable;
    reg [15:0]  r_PC;
@@ -59,24 +67,32 @@ module LCD_SPI_controller_16_bit(
    wire [15:0] w_var1;
    wire [15:0] w_var2;
    
+   // Register control
    reg [15:0] r_register[7:0];
    reg        r_zero_flag;
    reg        r_equal_flag;
    reg [7:0]  r_error_code;
    
+   // Display value
    reg [31:0] r_seven_seg_value;
    
-   reg [15:0] r_stack[STACK_SIZE-1:0];
-   //reg [15:0] r_SP;
-   
+   // Stack control   
    wire [15:0] i_stack_top_value;
    wire        i_stack_error;
    reg         o_stack_read_flag;
    reg         o_stack_write_flag;
    reg  [15:0] o_stack_write_value;
    
-   reg [15:0] r_check_number;
-
+   // DEBUG
+   reg [7:0] rx_count;
+   
+   uart_receive uart_receive1(
+.clk(i_Clk), //input clock
+.reset(i_Rst_H), //input reset 
+.RxD(i_uart_rx), //input receving data line
+.RxData(w_uart_rx_value), // output for 8 bits data
+.RxDV(w_uart_rx_DV));
+   
  stack main_stack (
 .clk(i_Clk),
 .i_reset(i_Rst_H),
@@ -94,7 +110,6 @@ module LCD_SPI_controller_16_bit(
     .o_LED_cathode(o_LED_cathode)
     );
     
-   
    SPI_Master_With_Single_CS SPI_Master_With_Single_CS_inst (
    .i_Rst_L(~i_Rst_H),     // FPGA Reset
    .i_Clk(i_Clk),       // FPGA Clock
@@ -118,18 +133,18 @@ module LCD_SPI_controller_16_bit(
    
   rams_sp_nc rams_sp_nc1 (
     .clk(i_Clk),
-    .en(e_ram_enable),
+    .read_en(e_ram_enable),
     .addr(r_PC),
     .dout_opcode(w_opcode),
     .dout_var1(w_var1),
     .dout_var2(w_var2));
 
-   ila_0  myila(.clk(i_Clk),
+  /* ila_0  myila(.clk(i_Clk),
    .probe0(w_opcode),
    .probe1(r_check_number),
    .probe2(r_PC),
    .probe3(r_SM_msg),
-   .probe4(r_SM_msg),
+   .probe4(w_uart_rx_value),
    .probe5(o_TX_LCD_Byte),
    .probe6(8'b0),
    .probe7(r_register[0]),
@@ -140,7 +155,7 @@ module LCD_SPI_controller_16_bit(
    .probe12(o_LCD_DC),
    .probe13(o_LCD_reset_n),
    .probe14(r_zero_flag),
-   .probe15(1'b0));
+   .probe15(1'b0));*/
      
     `include "timing_tasks.vh" 
     `include "LCD_tasks.vh" 
@@ -160,13 +175,18 @@ module LCD_SPI_controller_16_bit(
         r_PC=16'h0;
         r_zero_flag=0;
         r_error_code=8'h0;
-        //r_SP=0;
         r_timeout_counter=32'b0;
         r_seven_seg_value=32'h20_10_00_01;
+        o_led_2=1'b1;
     end
     
     always @(posedge i_Clk)
     begin
+        if(w_uart_rx_DV)
+        begin
+            o_led_2 <=~o_led_2; 
+            rx_count<=rx_count+1;    
+        end
         if (i_Rst_H)
         begin
             o_TX_LCD_Count=4'd1;
@@ -177,7 +197,6 @@ module LCD_SPI_controller_16_bit(
             r_PC=16'h0;
             r_zero_flag=0;
             r_error_code=8'h0;
-            //r_SP=0;
         end // if (i_Rst_H)
         else
         begin
@@ -258,8 +277,9 @@ module LCD_SPI_controller_16_bit(
                 end
                 HCF_2:  
                 begin 
-                    r_seven_seg_value[31:8]<=24'h230C0F;  
-                    r_seven_seg_value[7:0]<=r_error_code;
+                    //r_seven_seg_value[31:8]<=24'h230C0F;  
+                    //r_seven_seg_value[7:0]<=r_error_code;
+                    r_seven_seg_value[31:0]<={4'h0,w_uart_rx_value[7:4],4'h0,w_uart_rx_value[3:0],4'h0,rx_count[7:4],4'h0,rx_count[3:0]};
                     r_timeout_max<=32'd100_000_000;
                     if(r_timeout_counter>=r_timeout_max)  
                     begin 
@@ -278,7 +298,7 @@ module LCD_SPI_controller_16_bit(
                 end
                 HCF_4:  
                 begin 
-                    r_seven_seg_value<={4'h0,r_PC[15:12],4'h0,r_PC[11:8],4'h0,r_PC[7:4],4'h0,r_PC[3:0]};
+                    //r_seven_seg_value<={4'h0,r_PC[15:12],4'h0,r_PC[11:8],4'h0,r_PC[7:4],4'h0,r_PC[3:0]};
                     r_timeout_max<=32'd100_000_000;
                     if(r_timeout_counter>=r_timeout_max)  
                     begin 

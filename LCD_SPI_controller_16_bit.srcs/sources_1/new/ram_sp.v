@@ -1,11 +1,11 @@
 // Single-Port Block RAM No-Change Mode
 // File: rams_sp_nc.v
 
-module rams_sp_nc (clk, en, addr, dout_opcode, dout_var1,dout_var2);
+module rams_sp_nc (clk, read_en, addr, dout_opcode, dout_var1,dout_var2);
 
 input clk; 
  
-input en;
+input read_en;
 input [15:0] addr; 
 output [15:0] dout_opcode;
 output [15:0] dout_var1;
@@ -25,7 +25,7 @@ end
 
 always @(posedge clk)
 begin
-  if (en)
+  if (read_en)
   begin
       dout_opcode <= RAM[addr];
       dout_var1 <= RAM[addr+1];

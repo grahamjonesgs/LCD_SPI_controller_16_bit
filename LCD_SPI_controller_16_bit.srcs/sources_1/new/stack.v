@@ -12,11 +12,10 @@ output reg [15:0] o_stack_top_value;
 output reg o_stack_error;
 
 (* ram_style = "block" *) reg [15:0] RAM [1023:0];
-reg [15:0] o_stacktop;
 reg [15:0] r_stack_pointer;
 
-   ila_0  myila2(.clk(clk),
-   .probe0(o_stacktop),
+/*   ila_0  myila2(.clk(clk),
+   .probe0(o_stack_top_value),
    .probe1(r_stack_pointer),
    .probe2(r_PC),
    .probe3(i_write_value),
@@ -31,7 +30,7 @@ reg [15:0] r_stack_pointer;
    .probe12(1'b0),
    .probe13(o_stack_error),
    .probe14(i_write_flag),
-   .probe15(i_read_flag));
+   .probe15(i_read_flag)); */
 
 
 initial

@@ -108,6 +108,13 @@
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
+      <File Path="$PSRCDIR/sources_1/new/uart_receive.v">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="implementation"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
       <File Path="$PSRCDIR/sources_1/new/stack_tasks.vh">
         <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
@@ -209,7 +216,7 @@
       <File Path="$PSRCDIR/utils_1/imports/synth_1/LCD_SPI_controller_16_bit.dcp">
         <FileInfo>
           <Attr Name="ImportPath" Val="$PRUNDIR/synth_1/LCD_SPI_controller_16_bit.dcp"/>
-          <Attr Name="ImportTime" Val="1604003084"/>
+          <Attr Name="ImportTime" Val="1604343016"/>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedInSteps" Val="synth_1"/>
@@ -219,7 +226,7 @@
       <File Path="$PSRCDIR/utils_1/imports/impl_1/LCD_SPI_controller_16_bit_routed.dcp">
         <FileInfo>
           <Attr Name="ImportPath" Val="$PRUNDIR/impl_1/LCD_SPI_controller_16_bit_routed.dcp"/>
-          <Attr Name="ImportTime" Val="1604003084"/>
+          <Attr Name="ImportTime" Val="1604343016"/>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedInSteps" Val="impl_1"/>
@@ -233,6 +240,7 @@
     <FileSet Name="ila_0" Type="BlockSrcs" RelSrcDir="$PSRCDIR/ila_0">
       <File Path="$PSRCDIR/sources_1/ip/ila_0/ila_0.xci">
         <FileInfo>
+          <Attr Name="AutoDisabled" Val="1"/>
           <Attr Name="ImportPath" Val="$PPRDIR/../verilog_test_projects/ram_test/ram_test.srcs/sources_1/ip/ila_0/ila_0.xci"/>
           <Attr Name="ImportTime" Val="1601566192"/>
           <Attr Name="UsedIn" Val="synthesis"/>
@@ -339,7 +347,7 @@
         </ReportConfig>
         <ReportConfig DisplayName="Utilization - Place Design" Name="impl_1_place_report_utilization_0" Spec="report_utilization" RunStep="place_design" ReportFile="LCD_SPI_controller_16_bit_utilization_placed.rpt" Version="1" Minor="0">
           <ReportConfigOption Name="dummy_option" Type="string"/>
-          <ReportConfigOutputOption Name="pb" Type="string" Value=""/>
+          <ReportConfigOutputOption Name="pb" Type="string" Value="LCD_SPI_controller_16_bit_utilization_placed.pb"/>
         </ReportConfig>
         <ReportConfig DisplayName="Control Sets - Place Design" Name="impl_1_place_report_control_sets_0" Spec="report_control_sets" RunStep="place_design" ReportFile="LCD_SPI_controller_16_bit_control_sets_placed.rpt" Version="1" Minor="0">
           <ReportConfigOption Name="verbose" Type="" Value="true"/>
@@ -367,28 +375,28 @@
         </ReportConfig>
         <ReportConfig DisplayName="DRC - Route Design" Name="impl_1_route_report_drc_0" Spec="report_drc" RunStep="route_design" ReportFile="LCD_SPI_controller_16_bit_drc_routed.rpt" Version="1" Minor="0">
           <ReportConfigOption Name="dummy_option" Type="string"/>
-          <ReportConfigOutputOption Name="pb" Type="string" Value=""/>
-          <ReportConfigOutputOption Name="rpx" Type="string" Value=""/>
+          <ReportConfigOutputOption Name="pb" Type="string" Value="LCD_SPI_controller_16_bit_drc_routed.pb"/>
+          <ReportConfigOutputOption Name="rpx" Type="string" Value="LCD_SPI_controller_16_bit_drc_routed.rpx"/>
         </ReportConfig>
         <ReportConfig DisplayName="Methodology - Route Design" Name="impl_1_route_report_methodology_0" Spec="report_methodology" RunStep="route_design" ReportFile="LCD_SPI_controller_16_bit_methodology_drc_routed.rpt" Version="1" Minor="0">
           <ReportConfigOption Name="dummy_option" Type="string"/>
-          <ReportConfigOutputOption Name="pb" Type="string" Value=""/>
-          <ReportConfigOutputOption Name="rpx" Type="string" Value=""/>
+          <ReportConfigOutputOption Name="pb" Type="string" Value="LCD_SPI_controller_16_bit_methodology_drc_routed.pb"/>
+          <ReportConfigOutputOption Name="rpx" Type="string" Value="LCD_SPI_controller_16_bit_methodology_drc_routed.rpx"/>
         </ReportConfig>
         <ReportConfig DisplayName="Power - Route Design" Name="impl_1_route_report_power_0" Spec="report_power" RunStep="route_design" ReportFile="LCD_SPI_controller_16_bit_power_routed.rpt" Version="1" Minor="0">
           <ReportConfigOption Name="dummy_option" Type="string"/>
-          <ReportConfigOutputOption Name="pb" Type="string" Value=""/>
-          <ReportConfigOutputOption Name="rpx" Type="string" Value=""/>
+          <ReportConfigOutputOption Name="pb" Type="string" Value="LCD_SPI_controller_16_bit_power_summary_routed.pb"/>
+          <ReportConfigOutputOption Name="rpx" Type="string" Value="LCD_SPI_controller_16_bit_power_routed.rpx"/>
         </ReportConfig>
         <ReportConfig DisplayName="Route Status - Route Design" Name="impl_1_route_report_route_status_0" Spec="report_route_status" RunStep="route_design" ReportFile="LCD_SPI_controller_16_bit_route_status.rpt" Version="1" Minor="0">
           <ReportConfigOption Name="dummy_option" Type="string"/>
-          <ReportConfigOutputOption Name="pb" Type="string" Value=""/>
+          <ReportConfigOutputOption Name="pb" Type="string" Value="LCD_SPI_controller_16_bit_route_status.pb"/>
         </ReportConfig>
         <ReportConfig DisplayName="Timing Summary - Route Design" Name="impl_1_route_report_timing_summary_0" Spec="report_timing_summary" RunStep="route_design" ReportFile="LCD_SPI_controller_16_bit_timing_summary_routed.rpt" Version="1" Minor="0">
           <ReportConfigOption Name="check_timing_verbose" Type="" Value="true"/>
           <ReportConfigOption Name="max_paths" Type="" Value="10"/>
-          <ReportConfigOutputOption Name="pb" Type="string" Value=""/>
-          <ReportConfigOutputOption Name="rpx" Type="string" Value=""/>
+          <ReportConfigOutputOption Name="pb" Type="string" Value="LCD_SPI_controller_16_bit_timing_summary_routed.pb"/>
+          <ReportConfigOutputOption Name="rpx" Type="string" Value="LCD_SPI_controller_16_bit_timing_summary_routed.rpx"/>
         </ReportConfig>
         <ReportConfig DisplayName="Incremental Reuse - Route Design" Name="impl_1_route_report_incremental_reuse_0" Spec="report_incremental_reuse" RunStep="route_design" ReportFile="LCD_SPI_controller_16_bit_incremental_reuse_routed.rpt" Version="1" Minor="0">
           <ReportConfigOption Name="dummy_option" Type="string"/>
@@ -398,8 +406,8 @@
         </ReportConfig>
         <ReportConfig DisplayName="Bus Skew - Route Design" Name="impl_1_route_report_bus_skew_0" Spec="report_bus_skew" RunStep="route_design" ReportFile="LCD_SPI_controller_16_bit_bus_skew_routed.rpt" Version="1" Minor="1">
           <ReportConfigOption Name="warn_on_violation" Type="" Value="true"/>
-          <ReportConfigOutputOption Name="pb" Type="string" Value=""/>
-          <ReportConfigOutputOption Name="rpx" Type="string" Value=""/>
+          <ReportConfigOutputOption Name="pb" Type="string" Value="LCD_SPI_controller_16_bit_bus_skew_routed.pb"/>
+          <ReportConfigOutputOption Name="rpx" Type="string" Value="LCD_SPI_controller_16_bit_bus_skew_routed.rpx"/>
         </ReportConfig>
         <ReportConfig DisplayName="implementation_log" Name="impl_1_route_implementation_log_0" Spec="" RunStep="route_design" ReportFile="LCD_SPI_controller_16_bit.vdi">
           <ReportConfigOption Name="dummy_option" Type="string"/>
