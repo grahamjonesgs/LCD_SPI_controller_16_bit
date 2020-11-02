@@ -39,6 +39,7 @@ module LCD_SPI_controller_16_bit(
     
    parameter STACK_SIZE=1024;
    parameter OPCODE_REQUEST=4'h0, OPCODE_FETCH=4'h1, OPCODE_EXECUTE=4'h2, HCF_1=4'h3,HCF_2=4'h4,  HCF_3=4'h5, HCF_4=4'h6;
+   parameter LOAD_START=4'h7, LOADING_BYTE1=4'h8, LOADING_BYTE2=4'h9, LOAD_COMPLETE=4'hA;
    parameter ERR_INV_OPCODE=8'h1, ERR_INV_FSM_STATE=8'h2, ERR_STACK=8'h3;
     
    // UART receive control
@@ -62,10 +63,15 @@ module LCD_SPI_controller_16_bit(
    // Machine control
    reg [3:0] r_SM_msg;
    reg e_ram_enable;
-   reg [15:0]  r_PC;
+   reg [11:0]  r_PC;
    wire [15:0] w_opcode;
    wire [15:0] w_var1;
    wire [15:0] w_var2;
+   
+   //load control
+   reg o_write_en;
+   reg [15:0] o_write_value;
+   reg [11:0] o_write_addr;
    
    // Register control
    reg [15:0] r_register[7:0];
@@ -86,23 +92,23 @@ module LCD_SPI_controller_16_bit(
    // DEBUG
    reg [7:0] rx_count;
    
-   uart_receive uart_receive1(
-.clk(i_Clk), //input clock
-.reset(i_Rst_H), //input reset 
-.RxD(i_uart_rx), //input receving data line
-.RxData(w_uart_rx_value), // output for 8 bits data
-.RxDV(w_uart_rx_DV));
+ uart_receive uart_receive1(
+    .clk(i_Clk), //input clock
+    .reset(i_Rst_H), //input reset 
+    .RxD(i_uart_rx), //input receving data line
+    .RxData(w_uart_rx_value), // output for 8 bits data
+    .RxDV(w_uart_rx_DV));
    
  stack main_stack (
-.clk(i_Clk),
-.i_reset(i_Rst_H),
-.i_read_flag(o_stack_read_flag),
-.i_write_flag(o_stack_write_flag),
-.i_write_value(o_stack_write_value),
-.o_stack_top_value(i_stack_top_value),
-.o_stack_error(i_stack_error));
+    .clk(i_Clk),
+    .i_reset(i_Rst_H),
+    .i_read_flag(o_stack_read_flag),
+    .i_write_flag(o_stack_write_flag),
+    .i_write_value(o_stack_write_value),
+    .o_stack_top_value(i_stack_top_value),
+    .o_stack_error(i_stack_error));
    
-   Seven_seg_LED_Display_Controller Seven_seg_LED_Display_Controller1 (
+ Seven_seg_LED_Display_Controller Seven_seg_LED_Display_Controller1 (
     .i_sysclk(i_Clk),
     .i_reset(i_Rst_H), 
     .i_displayed_number(r_seven_seg_value), // Number to display
@@ -110,7 +116,7 @@ module LCD_SPI_controller_16_bit(
     .o_LED_cathode(o_LED_cathode)
     );
     
-   SPI_Master_With_Single_CS SPI_Master_With_Single_CS_inst (
+ SPI_Master_With_Single_CS SPI_Master_With_Single_CS_inst (
    .i_Rst_L(~i_Rst_H),     // FPGA Reset
    .i_Clk(i_Clk),       // FPGA Clock
    
@@ -134,10 +140,14 @@ module LCD_SPI_controller_16_bit(
   rams_sp_nc rams_sp_nc1 (
     .clk(i_Clk),
     .read_en(e_ram_enable),
-    .addr(r_PC),
+    .read_addr(r_PC),
     .dout_opcode(w_opcode),
     .dout_var1(w_var1),
-    .dout_var2(w_var2));
+    .dout_var2(w_var2),
+    .write_addr(o_write_addr),
+    .write_value(o_write_value),
+    .write_en(o_write_en)
+    );
 
   /* ila_0  myila(.clk(i_Clk),
    .probe0(w_opcode),
@@ -172,7 +182,7 @@ module LCD_SPI_controller_16_bit(
         r_SM_msg=OPCODE_REQUEST;
         r_timeout_counter=0;
         o_LCD_reset_n=1'b0; 
-        r_PC=16'h0;
+        r_PC=12'h0;
         r_zero_flag=0;
         r_error_code=8'h0;
         r_timeout_counter=32'b0;
@@ -195,7 +205,7 @@ module LCD_SPI_controller_16_bit(
             r_SM_msg=OPCODE_REQUEST;
             r_timeout_counter=0;
             o_LCD_reset_n=1'b0; 
-            r_PC=16'h0;
+            r_PC=12'h0;
             r_zero_flag=0;
             r_error_code=8'h0;
             rx_count=8'b0;
@@ -261,7 +271,7 @@ module LCD_SPI_controller_16_bit(
                     16'hFFFF: 
                     begin
                         r_SM_msg<=OPCODE_REQUEST;  
-                        r_PC<=0;
+                        r_PC<=12'h0;
                     end // Case FFFF                
                     default: 
                     begin
