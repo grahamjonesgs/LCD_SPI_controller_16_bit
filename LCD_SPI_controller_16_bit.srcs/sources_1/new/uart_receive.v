@@ -64,6 +64,7 @@ always @ (posedge clk)
             bitcounter <=0; // reset the bit counter
             counter <=0; // reset the counter
             samplecounter <=0; // reset the sample counter
+            RxData=8'h0;
         end else begin // if reset is not asserted
             counter <= counter +1; // start count in the counter
             if (counter >= div_counter-1) begin // if counter reach the baud rate with sampling 
@@ -112,11 +113,11 @@ begin
                 RxData = rxshiftreg [8:1];
                 if(dvflagsent==0) begin
                     RxDV<=1'b1;
+                    dvflagsent<=1'b1;
                     end
                     else
                     begin
                     RxDV<=1'b0;
-                    dvflagsent<=1'b1;
                     end
                 end 
                 inc_bitcounter <=1; // trigger the increment bit counter if bit counter is not 9

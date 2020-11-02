@@ -178,6 +178,7 @@ module LCD_SPI_controller_16_bit(
         r_timeout_counter=32'b0;
         r_seven_seg_value=32'h20_10_00_01;
         o_led_2=1'b1;
+        rx_count=8'b0;
     end
     
     always @(posedge i_Clk)
@@ -197,6 +198,7 @@ module LCD_SPI_controller_16_bit(
             r_PC=16'h0;
             r_zero_flag=0;
             r_error_code=8'h0;
+            rx_count=8'b0;
         end // if (i_Rst_H)
         else
         begin
