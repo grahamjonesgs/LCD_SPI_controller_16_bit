@@ -75,6 +75,7 @@ module Seven_seg_LED_Display_Controller(
         8'h21: o_LED_cathode = 8'b11111110; // "-"   
         8'h22: o_LED_cathode = 8'b11111111; // " "  
         8'h23: o_LED_cathode = 8'b11001000; // "H"  
+        8'h24: o_LED_cathode = 8'b11110001; // "L" 
        
         default:o_LED_cathode = 8'b11111110; // "-" 
         endcase

@@ -39,12 +39,13 @@ module LCD_SPI_controller_16_bit(
     
    parameter STACK_SIZE=1024;
    parameter OPCODE_REQUEST=4'h0, OPCODE_FETCH=4'h1, OPCODE_EXECUTE=4'h2, HCF_1=4'h3,HCF_2=4'h4,  HCF_3=4'h5, HCF_4=4'h6;
-   parameter LOAD_START=4'h7, LOADING_BYTE1=4'h8, LOADING_BYTE2=4'h9, LOAD_COMPLETE=4'hA;
-   parameter ERR_INV_OPCODE=8'h1, ERR_INV_FSM_STATE=8'h2, ERR_STACK=8'h3;
+   parameter LOAD_START=4'h7, LOADING_BYTE=4'h8, LOAD_COMPLETE=4'hC;
+   parameter ERR_INV_OPCODE=8'h1, ERR_INV_FSM_STATE=8'h2, ERR_STACK=8'h3, ERR_LOAD=8'h4;
     
    // UART receive control
    wire [7:0]    w_uart_rx_value;  // Received value
    wire          w_uart_rx_DV;     // receive flag
+   reg           r_loading;
    
    // LCD control
    reg [3:0]  o_TX_LCD_Count;  // # bytes per CS low
@@ -72,6 +73,7 @@ module LCD_SPI_controller_16_bit(
    reg o_write_en;
    reg [15:0] o_write_value;
    reg [11:0] o_write_addr;
+   reg [1:0]  r_load_byte_counter;
    
    // Register control
    reg [15:0] r_register[7:0];
@@ -172,7 +174,8 @@ module LCD_SPI_controller_16_bit(
     `include "led_tasks.vh"  
     `include "register_tasks.vh" 
     `include "control_tasks.vh"     
-    `include "stack_tasks.vh"     
+    `include "stack_tasks.vh"  
+    `include "functions.vh"   
     
     
     initial
@@ -189,30 +192,93 @@ module LCD_SPI_controller_16_bit(
         r_seven_seg_value=32'h20_10_00_01;
         o_led_2=1'b1;
         rx_count=8'b0;
+        r_loading=1'b0;
+        o_write_addr=12'h0;
     end
+    
     
     always @(posedge i_Clk)
     begin
-        if(w_uart_rx_DV)
-        begin
-            o_led_2 <=~o_led_2; 
-            rx_count<=rx_count+1;    
-        end
         if (i_Rst_H)
         begin
-            o_TX_LCD_Count=4'd1;
-            o_TX_LCD_Byte=8'b0;  
-            r_SM_msg=OPCODE_REQUEST;
-            r_timeout_counter=0;
-            o_LCD_reset_n=1'b0; 
-            r_PC=12'h0;
-            r_zero_flag=0;
-            r_error_code=8'h0;
-            rx_count=8'b0;
+            o_TX_LCD_Count<=4'd1;
+            o_TX_LCD_Byte<=8'b0;  
+            r_SM_msg<=OPCODE_REQUEST;
+            r_timeout_counter<=0;
+            o_LCD_reset_n<=1'b0; 
+            r_PC<=12'h0;
+            r_zero_flag<=0;
+            r_error_code<=8'h0;
+            rx_count<=8'b0;
+            r_loading<=1'b0;
+            o_write_addr<=12'h0;
         end // if (i_Rst_H)
+        else if(w_uart_rx_DV&~r_loading&w_uart_rx_value==8'h53)
+        begin
+            o_led_2 <=~o_led_2; 
+            r_loading<=1'b1;
+            r_SM_msg<=LOADING_BYTE;
+            r_load_byte_counter=0;
+        end
         else
         begin
-            case(r_SM_msg)               
+            case(r_SM_msg) 
+                LOADING_BYTE:
+                begin
+                    r_seven_seg_value<={4'h2,4'h4,4'h0,o_write_addr[11:8],4'h0,o_write_addr[7:4],4'h0,o_write_addr[3:0]};
+                    if (w_uart_rx_DV)
+                    begin
+                        if(w_uart_rx_value==8'h58) // X end of program
+                        begin
+                            if (r_load_byte_counter==3)
+                            begin     
+                                r_SM_msg<=LOAD_COMPLETE;         
+                            end // (r_load_byte_counter==3)
+                            else
+                            begin
+                                r_SM_msg<=HCF_1; // Halt and catch fire error 1 
+                                r_error_code<=ERR_LOAD;
+                            end // else (r_load_byte_counter==3)
+                        end // if(w_uart_rx_value==8'h58)
+                        else
+                        begin 
+                            case (r_load_byte_counter)
+                                0: o_write_value[15:12]<=return_hex_from_ascii(w_uart_rx_value);
+                                1: o_write_value[11:8]<=return_hex_from_ascii(w_uart_rx_value);
+                                2: o_write_value[7:4]<=return_hex_from_ascii(w_uart_rx_value);
+                                3: o_write_value[3:0]<=return_hex_from_ascii(w_uart_rx_value);
+                                default: ;         
+                            endcase
+                            
+                            if (r_load_byte_counter==3)
+                            begin
+                                r_load_byte_counter<=0;
+                                o_write_addr=o_write_addr+1;
+                            end
+                            else
+                            begin
+                                r_load_byte_counter<=r_load_byte_counter+1;
+                            end                   
+                        end // else if(w_uart_rx_value==8'h58)
+                    end
+                end  
+                
+                LOAD_COMPLETE:
+                begin
+                    r_seven_seg_value=32'h20_10_00_02;
+                    o_TX_LCD_Count<=4'd1;
+                    o_TX_LCD_Byte<=8'b0;  
+                    r_SM_msg<=OPCODE_REQUEST;
+                    r_timeout_counter<=0;
+                    o_LCD_reset_n<=1'b0; 
+                    r_PC<=12'h0;
+                    r_zero_flag<=0;
+                    r_error_code<=8'h0;
+                    rx_count<=8'b0;
+                    r_loading<=1'b0;
+                    o_write_addr<=12'h0;  
+                end
+                
                 OPCODE_REQUEST: 
                 begin
                 o_stack_write_flag<=1'b0;
@@ -289,9 +355,9 @@ module LCD_SPI_controller_16_bit(
                 end
                 HCF_2:  
                 begin 
-                    //r_seven_seg_value[31:8]<=24'h230C0F;  
-                    //r_seven_seg_value[7:0]<=r_error_code;
-                    r_seven_seg_value[31:0]<={4'h0,w_uart_rx_value[7:4],4'h0,w_uart_rx_value[3:0],4'h0,rx_count[7:4],4'h0,rx_count[3:0]};
+                    r_seven_seg_value[31:8]<=24'h230C0F;  
+                    r_seven_seg_value[7:0]<=r_error_code;
+                    //r_seven_seg_value[31:0]<={4'h0,w_uart_rx_value[7:4],4'h0,w_uart_rx_value[3:0],4'h0,rx_count[7:4],4'h0,rx_count[3:0]};
                     r_timeout_max<=32'd100_000_000;
                     if(r_timeout_counter>=r_timeout_max)  
                     begin 
@@ -310,7 +376,7 @@ module LCD_SPI_controller_16_bit(
                 end
                 HCF_4:  
                 begin 
-                    //r_seven_seg_value<={4'h0,r_PC[15:12],4'h0,r_PC[11:8],4'h0,r_PC[7:4],4'h0,r_PC[3:0]};
+                    r_seven_seg_value<={4'h2,4'h2,4'h0,r_PC[11:8],4'h0,r_PC[7:4],4'h0,r_PC[3:0]};
                     r_timeout_max<=32'd100_000_000;
                     if(r_timeout_counter>=r_timeout_max)  
                     begin 
@@ -322,9 +388,7 @@ module LCD_SPI_controller_16_bit(
                         r_timeout_counter<=r_timeout_counter+1;               
                     end // else if(r_timeout_counter>=DELAY_TIME)
                     
-                end
-                
-           
+                end              
                 default: r_SM_msg<=HCF_1; // loop in error
             endcase // case(r_SM_msg)         
         end // else if (i_Rst_H)
