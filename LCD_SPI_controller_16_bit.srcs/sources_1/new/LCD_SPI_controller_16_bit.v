@@ -73,6 +73,8 @@ module LCD_SPI_controller_16_bit(
    reg o_write_en;
    reg [15:0] o_write_value;
    reg [11:0] o_write_addr;
+   reg [11:0] r_next_write_addr;
+   
    reg [1:0]  r_load_byte_counter;
    
    // Register control
@@ -195,6 +197,7 @@ module LCD_SPI_controller_16_bit(
         rx_count=8'b0;
         r_loading=1'b0;
         o_write_addr=12'h0;
+        r_next_write_addr=12'h0;
     end
     
     
@@ -213,6 +216,7 @@ module LCD_SPI_controller_16_bit(
             rx_count<=8'b0;
             r_loading<=1'b0;
             o_write_addr<=12'h0;
+            r_next_write_addr<=12'h0;
             r_seven_seg_value=32'h20_10_00_03;
         end // if (i_Rst_H)
         else if(w_uart_rx_DV&~r_loading&w_uart_rx_value==8'h53) // Load start flag received
@@ -222,6 +226,7 @@ module LCD_SPI_controller_16_bit(
             r_SM_msg<=LOADING_BYTE;
             r_load_byte_counter<=0;
             o_write_addr<=12'h0;
+            r_next_write_addr<=12'h0;
         end
         else
         begin
@@ -230,9 +235,7 @@ module LCD_SPI_controller_16_bit(
                 begin
                     o_write_en<=1'b0;
                     //r_seven_seg_value<={4'h2,4'h4,4'h0,o_write_addr[11:8],4'h0,o_write_addr[7:4],4'h0,o_write_addr[3:0]};
-                    r_seven_seg_value<={4'h2,4'h4,4'h0,r_load_byte_counter,4'h0,o_write_addr[7:4],4'h0,o_write_addr[3:0]};
-                   
-                    
+                    r_seven_seg_value<={8'h24,4'h0,r_next_write_addr[7:4],4'h0,r_next_write_addr[7:4],4'h0,r_next_write_addr[3:0]};
                     if (w_uart_rx_DV)
                     begin
                         if(w_uart_rx_value==8'h58) // X end of program
@@ -250,10 +253,7 @@ module LCD_SPI_controller_16_bit(
                         else
                         begin 
                             case (r_load_byte_counter)
-                                0: begin
-                                    o_write_value[15:12]<=return_hex_from_ascii(w_uart_rx_value);
-                                    o_write_addr<=o_write_addr+1;
-                                    end
+                                0: o_write_value[15:12]<=return_hex_from_ascii(w_uart_rx_value);
                                 1: o_write_value[11:8]<=return_hex_from_ascii(w_uart_rx_value);
                                 2: o_write_value[7:4]<=return_hex_from_ascii(w_uart_rx_value);
                                 3: o_write_value[3:0]<=return_hex_from_ascii(w_uart_rx_value);
@@ -261,7 +261,9 @@ module LCD_SPI_controller_16_bit(
                             endcase                           
                             if (r_load_byte_counter==3)
                             begin
-                                r_load_byte_counter<=0;   
+                                r_load_byte_counter<=0; 
+                                o_write_addr<=r_next_write_addr; 
+                                r_next_write_addr<=r_next_write_addr+1;
                                 o_write_en<=1'b1;
                             end
                             else
