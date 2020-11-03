@@ -83,6 +83,7 @@ module LCD_SPI_controller_16_bit(
    
    // Display value
    reg [31:0] r_seven_seg_value;
+   reg r_error_display_type;
    
    // Stack control   
    wire [15:0] i_stack_top_value;
@@ -212,51 +213,59 @@ module LCD_SPI_controller_16_bit(
             rx_count<=8'b0;
             r_loading<=1'b0;
             o_write_addr<=12'h0;
+            r_seven_seg_value=32'h20_10_00_03;
         end // if (i_Rst_H)
-        else if(w_uart_rx_DV&~r_loading&w_uart_rx_value==8'h53)
+        else if(w_uart_rx_DV&~r_loading&w_uart_rx_value==8'h53) // Load start flag received
         begin
             o_led_2 <=~o_led_2; 
             r_loading<=1'b1;
             r_SM_msg<=LOADING_BYTE;
-            r_load_byte_counter=0;
+            r_load_byte_counter<=0;
+            o_write_addr<=12'h0;
         end
         else
         begin
             case(r_SM_msg) 
                 LOADING_BYTE:
                 begin
-                    r_seven_seg_value<={4'h2,4'h4,4'h0,o_write_addr[11:8],4'h0,o_write_addr[7:4],4'h0,o_write_addr[3:0]};
+                    o_write_en<=1'b0;
+                    //r_seven_seg_value<={4'h2,4'h4,4'h0,o_write_addr[11:8],4'h0,o_write_addr[7:4],4'h0,o_write_addr[3:0]};
+                    r_seven_seg_value<={4'h2,4'h4,4'h0,r_load_byte_counter,4'h0,o_write_addr[7:4],4'h0,o_write_addr[3:0]};
+                   
+                    
                     if (w_uart_rx_DV)
                     begin
                         if(w_uart_rx_value==8'h58) // X end of program
                         begin
-                            if (r_load_byte_counter==3)
+                            if (r_load_byte_counter==0)
                             begin     
                                 r_SM_msg<=LOAD_COMPLETE;         
                             end // (r_load_byte_counter==3)
                             else
                             begin
-                                r_SM_msg<=HCF_1; // Halt and catch fire error 1 
+                                r_SM_msg<=HCF_1; // Halt and catch fire error
                                 r_error_code<=ERR_LOAD;
                             end // else (r_load_byte_counter==3)
                         end // if(w_uart_rx_value==8'h58)
                         else
                         begin 
                             case (r_load_byte_counter)
-                                0: o_write_value[15:12]<=return_hex_from_ascii(w_uart_rx_value);
+                                0: begin
+                                    o_write_value[15:12]<=return_hex_from_ascii(w_uart_rx_value);
+                                    o_write_addr<=o_write_addr+1;
+                                    end
                                 1: o_write_value[11:8]<=return_hex_from_ascii(w_uart_rx_value);
                                 2: o_write_value[7:4]<=return_hex_from_ascii(w_uart_rx_value);
                                 3: o_write_value[3:0]<=return_hex_from_ascii(w_uart_rx_value);
                                 default: ;         
-                            endcase
-                            
+                            endcase                           
                             if (r_load_byte_counter==3)
                             begin
-                                r_load_byte_counter<=0;
-                                o_write_addr=o_write_addr+1;
+                                r_load_byte_counter<=0;   
+                                o_write_en<=1'b1;
                             end
                             else
-                            begin
+                            begin                              
                                 r_load_byte_counter<=r_load_byte_counter+1;
                             end                   
                         end // else if(w_uart_rx_value==8'h58)
@@ -373,10 +382,14 @@ module LCD_SPI_controller_16_bit(
                 begin
                     r_timeout_counter<=0;
                     r_SM_msg<=HCF_4;
+                    r_error_display_type<=~r_error_display_type;
                 end
                 HCF_4:  
                 begin 
-                    r_seven_seg_value<={4'h2,4'h2,4'h0,r_PC[11:8],4'h0,r_PC[7:4],4'h0,r_PC[3:0]};
+                    if (r_error_display_type)
+                        r_seven_seg_value<={4'h2,4'h2,4'h0,r_PC[11:8],4'h0,r_PC[7:4],4'h0,r_PC[3:0]};
+                    else
+                        r_seven_seg_value<={4'h0,w_opcode[15:12],4'h0,w_opcode[11:8],4'h0,w_opcode[7:4],4'h0,w_opcode[3:0]};       
                     r_timeout_max<=32'd100_000_000;
                     if(r_timeout_counter>=r_timeout_max)  
                     begin 
@@ -388,7 +401,8 @@ module LCD_SPI_controller_16_bit(
                         r_timeout_counter<=r_timeout_counter+1;               
                     end // else if(r_timeout_counter>=DELAY_TIME)
                     
-                end              
+                end   
+                           
                 default: r_SM_msg<=HCF_1; // loop in error
             endcase // case(r_SM_msg)         
         end // else if (i_Rst_H)
