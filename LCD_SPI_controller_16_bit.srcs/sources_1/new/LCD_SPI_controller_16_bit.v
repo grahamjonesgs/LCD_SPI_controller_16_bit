@@ -43,59 +43,58 @@ module LCD_SPI_controller_16_bit(
    parameter ERR_INV_OPCODE=8'h1, ERR_INV_FSM_STATE=8'h2, ERR_STACK=8'h3, ERR_LOAD=8'h4;
     
    // UART receive control
-   wire [7:0]    w_uart_rx_value;  // Received value
-   wire          w_uart_rx_DV;     // receive flag
-   reg           r_loading;
+   wire [7:0]   w_uart_rx_value;    // Received value
+   wire         w_uart_rx_DV;       // receive flag
    
    // LCD control
-   reg [3:0]  o_TX_LCD_Count;  // # bytes per CS low
-   reg [7:0]  o_TX_LCD_Byte;       // Byte to transmit on MOSI
-   reg        o_TX_LCD_DV;         // Data Valid Pulse with i_TX_Byte
-   wire       i_TX_LCD_Ready;      // Transmit Ready for next byte
+   reg  [3:0]   o_TX_LCD_Count;     // # bytes per CS low
+   reg  [7:0]   o_TX_LCD_Byte;      // Byte to transmit on MOSI
+   reg          o_TX_LCD_DV;        // Data Valid Pulse with i_TX_Byte
+   wire         i_TX_LCD_Ready;     // Transmit Ready for next byte
    
    // RX (MISO) Signals
-   wire [3:0] i_RX_LCD_Count;  // Index RX byte
-   wire       i_RX_LCD_DV;     // Data Valid pulse (1 clock cycle)
-   wire [7:0] i_RX_LCD_Byte;   // Byte received on MISO
+   wire [3:0]   i_RX_LCD_Count;     // Index RX byte
+   wire         i_RX_LCD_DV;        // Data Valid pulse (1 clock cycle)
+   wire [7:0]   i_RX_LCD_Byte;      // Byte received on MISO
     
-   reg [31:0] r_timeout_counter;
-   reg [31:0] r_timeout_max;  
+   reg  [31:0]  r_timeout_counter;
+   reg  [31:0]  r_timeout_max;  
    
    // Machine control
-   reg [3:0] r_SM_msg;
-   reg e_ram_enable;
-   reg [11:0]  r_PC;
-   wire [15:0] w_opcode;
-   wire [15:0] w_var1;
-   wire [15:0] w_var2;
+   reg  [3:0]   r_SM_msg;
+   reg          r_ram_read_DV;
+   reg  [11:0]  r_PC;
+   wire [15:0]  w_opcode;
+   wire [15:0]  w_var1;
+   wire [15:0]  w_var2;
    
    //load control
-   reg o_write_en;
-   reg [15:0] o_write_value;
-   reg [11:0] o_write_addr;
-   reg [11:0] r_next_write_addr;
+   reg          o_ram_write_DV;
+   reg  [15:0]  o_ram_write_value;
+   reg  [11:0]  o_ram_write_addr;
+   reg  [11:0]  r_ram_next_write_addr;
    
-   reg [1:0]  r_load_byte_counter;
+   reg  [1:0]   r_load_byte_counter;
    
    // Register control
-   reg [15:0] r_register[7:0];
-   reg        r_zero_flag;
-   reg        r_equal_flag;
-   reg [7:0]  r_error_code;
+   reg  [15:0]  r_register[7:0];
+   reg          r_zero_flag;
+   reg          r_equal_flag;
+   reg  [7:0]   r_error_code;
    
    // Display value
-   reg [31:0] r_seven_seg_value;
-   reg r_error_display_type;
+   reg  [31:0]  r_seven_seg_value;
+   reg          r_error_display_type;
    
    // Stack control   
-   wire [15:0] i_stack_top_value;
-   wire        i_stack_error;
-   reg         o_stack_read_flag;
-   reg         o_stack_write_flag;
-   reg  [15:0] o_stack_write_value;
+   wire [15:0]  i_stack_top_value;
+   wire         i_stack_error;
+   reg          o_stack_read_flag;
+   reg          o_stack_write_flag;
+   reg  [15:0]  o_stack_write_value;
    
    // DEBUG
-   reg [7:0] rx_count;
+   reg  [7:0]   rx_count;
    
  uart_receive uart_receive1(
     .clk(i_Clk), //input clock
@@ -122,20 +121,17 @@ module LCD_SPI_controller_16_bit(
     );
     
  SPI_Master_With_Single_CS SPI_Master_With_Single_CS_inst (
-   .i_Rst_L(~i_Rst_H),     // FPGA Reset
-   .i_Clk(i_Clk),       // FPGA Clock
-   
+   .i_Rst_L(~i_Rst_H),     
+   .i_Clk(i_Clk),       
    // TX (MOSI) Signals
-   .i_TX_Count(o_TX_LCD_Count),  // # bytes per CS low
+   .i_TX_Count(o_TX_LCD_Count),     // # bytes per CS low
    .i_TX_Byte(o_TX_LCD_Byte),       // Byte to transmit on MOSI
-   .i_TX_DV(o_TX_LCD_DV),         // Data Valid Pulse with i_TX_Byte
-   .o_TX_Ready(i_TX_LCD_Ready),      // Transmit Ready for next byte
-   
+   .i_TX_DV(o_TX_LCD_DV),           // Data Valid Pulse with i_TX_Byte
+   .o_TX_Ready(i_TX_LCD_Ready),     // Transmit Ready for next byte
    // RX (MISO) Signals
-   .o_RX_Count(i_RX_LCD_Count),  // Index RX byte
-   .o_RX_DV(i_RX_LCD_DV),     // Data Valid pulse (1 clock cycle)
-   .o_RX_Byte(i_RX_LCD_Byte),   // Byte received on MISO
-
+   .o_RX_Count(i_RX_LCD_Count),     // Index RX byte
+   .o_RX_DV(i_RX_LCD_DV),           // Data Valid pulse (1 clock cycle)
+   .o_RX_Byte(i_RX_LCD_Byte),       // Byte received on MISO
    // SPI Interface
    .o_SPI_Clk(o_SPI_LCD_Clk),
    .i_SPI_MISO(i_SPI_LCD_MISO),
@@ -144,14 +140,14 @@ module LCD_SPI_controller_16_bit(
    
   rams_sp_nc rams_sp_nc1 (
     .clk(i_Clk),
-    .read_en(e_ram_enable),
+    .read_en(r_ram_read_DV),
     .read_addr(r_PC),
     .dout_opcode(w_opcode),
     .dout_var1(w_var1),
     .dout_var2(w_var2),
-    .write_addr(o_write_addr),
-    .write_value(o_write_value),
-    .write_en(o_write_en)
+    .write_addr(o_ram_write_addr),
+    .write_value(o_ram_write_value),
+    .write_en(o_ram_write_DV)
     );
 
   /* ila_0  myila(.clk(i_Clk),
@@ -195,9 +191,8 @@ module LCD_SPI_controller_16_bit(
         r_seven_seg_value=32'h20_10_00_01;
         o_led_2=1'b1;
         rx_count=8'b0;
-        r_loading=1'b0;
-        o_write_addr=12'h0;
-        r_next_write_addr=12'h0;
+        o_ram_write_addr=12'h0;
+        r_ram_next_write_addr=12'h0;
     end
     
     
@@ -214,28 +209,27 @@ module LCD_SPI_controller_16_bit(
             r_zero_flag<=0;
             r_error_code<=8'h0;
             rx_count<=8'b0;
-            r_loading<=1'b0;
-            o_write_addr<=12'h0;
-            r_next_write_addr<=12'h0;
+ 
+            o_ram_write_addr<=12'h0;
+            r_ram_next_write_addr<=12'h0;
             r_seven_seg_value=32'h20_10_00_03;
         end // if (i_Rst_H)
-        else if(w_uart_rx_DV&~r_loading&w_uart_rx_value==8'h53) // Load start flag received
+        else if(w_uart_rx_DV&w_uart_rx_value==8'h53) // Load start flag received
         begin
             o_led_2 <=~o_led_2; 
-            r_loading<=1'b1;
             r_SM_msg<=LOADING_BYTE;
             r_load_byte_counter<=0;
-            o_write_addr<=12'h0;
-            r_next_write_addr<=12'h0;
+            o_ram_write_addr<=12'h0;
+            r_ram_next_write_addr<=12'h0;
         end
         else
         begin
             case(r_SM_msg) 
                 LOADING_BYTE:
                 begin
-                    o_write_en<=1'b0;
-                    //r_seven_seg_value<={4'h2,4'h4,4'h0,o_write_addr[11:8],4'h0,o_write_addr[7:4],4'h0,o_write_addr[3:0]};
-                    r_seven_seg_value<={8'h24,4'h0,r_next_write_addr[7:4],4'h0,r_next_write_addr[7:4],4'h0,r_next_write_addr[3:0]};
+                    o_ram_write_DV<=1'b0;
+                    //r_seven_seg_value<={4'h2,4'h4,4'h0,o_ram_write_addr[11:8],4'h0,o_ram_write_addr[7:4],4'h0,o_ram_write_addr[3:0]};
+                    r_seven_seg_value<={8'h24,4'h0,r_ram_next_write_addr[7:4],4'h0,r_ram_next_write_addr[7:4],4'h0,r_ram_next_write_addr[3:0]};
                     if (w_uart_rx_DV)
                     begin
                         if(w_uart_rx_value==8'h58) // X end of program
@@ -253,18 +247,18 @@ module LCD_SPI_controller_16_bit(
                         else
                         begin 
                             case (r_load_byte_counter)
-                                0: o_write_value[15:12]<=return_hex_from_ascii(w_uart_rx_value);
-                                1: o_write_value[11:8]<=return_hex_from_ascii(w_uart_rx_value);
-                                2: o_write_value[7:4]<=return_hex_from_ascii(w_uart_rx_value);
-                                3: o_write_value[3:0]<=return_hex_from_ascii(w_uart_rx_value);
+                                0: o_ram_write_value[15:12]<=return_hex_from_ascii(w_uart_rx_value);
+                                1: o_ram_write_value[11:8]<=return_hex_from_ascii(w_uart_rx_value);
+                                2: o_ram_write_value[7:4]<=return_hex_from_ascii(w_uart_rx_value);
+                                3: o_ram_write_value[3:0]<=return_hex_from_ascii(w_uart_rx_value);
                                 default: ;         
                             endcase                           
                             if (r_load_byte_counter==3)
                             begin
                                 r_load_byte_counter<=0; 
-                                o_write_addr<=r_next_write_addr; 
-                                r_next_write_addr<=r_next_write_addr+1;
-                                o_write_en<=1'b1;
+                                o_ram_write_addr<=r_ram_next_write_addr; 
+                                r_ram_next_write_addr<=r_ram_next_write_addr+1;
+                                o_ram_write_DV<=1'b1;
                             end
                             else
                             begin                              
@@ -286,8 +280,7 @@ module LCD_SPI_controller_16_bit(
                     r_zero_flag<=0;
                     r_error_code<=8'h0;
                     rx_count<=8'b0;
-                    r_loading<=1'b0;
-                    o_write_addr<=12'h0;  
+                    o_ram_write_addr<=12'h0;  
                 end
                 
                 OPCODE_REQUEST: 
@@ -301,18 +294,18 @@ module LCD_SPI_controller_16_bit(
                     end // default case
                     else
                     begin
-                        e_ram_enable<=1;
+                        r_ram_read_DV<=1;
                         r_SM_msg<=OPCODE_FETCH;
                     end
                 end 
                 OPCODE_FETCH: 
                 begin
-                    e_ram_enable<=0;
+                    r_ram_read_DV<=0;
                     r_SM_msg<=OPCODE_EXECUTE;
                 end  
                 OPCODE_EXECUTE:
                 begin
-                    //e_ram_enable<=0;
+                    //r_ram_read_DV<=0;
                     casez(w_opcode[15:0])
                     
                     16'h2001: spi_dc_write_command(w_var1);

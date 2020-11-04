@@ -222,7 +222,7 @@
       <File Path="$PSRCDIR/utils_1/imports/synth_1/LCD_SPI_controller_16_bit.dcp">
         <FileInfo>
           <Attr Name="ImportPath" Val="$PRUNDIR/synth_1/LCD_SPI_controller_16_bit.dcp"/>
-          <Attr Name="ImportTime" Val="1604440918"/>
+          <Attr Name="ImportTime" Val="1604474546"/>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedInSteps" Val="synth_1"/>
@@ -232,7 +232,7 @@
       <File Path="$PSRCDIR/utils_1/imports/impl_1/LCD_SPI_controller_16_bit_routed.dcp">
         <FileInfo>
           <Attr Name="ImportPath" Val="$PRUNDIR/impl_1/LCD_SPI_controller_16_bit_routed.dcp"/>
-          <Attr Name="ImportTime" Val="1604440918"/>
+          <Attr Name="ImportTime" Val="1604474546"/>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedInSteps" Val="impl_1"/>

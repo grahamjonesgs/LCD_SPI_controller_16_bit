@@ -1,15 +1,15 @@
 // Single-Port Block RAM No-Change Mode
 // File: rams_sp_nc.v
 
-module stack (clk, i_reset, i_read_flag, i_write_flag, i_write_value, o_stack_top_value, o_stack_error );
-
-input clk;
-input i_reset;
-input i_read_flag;
-input i_write_flag;
-input [15:0] i_write_value;
-output reg [15:0] o_stack_top_value;
-output reg o_stack_error;
+module stack (
+    input clk,
+    input i_reset,
+    input i_read_flag,
+    input i_write_flag,
+    input [15:0] i_write_value,
+    output reg [15:0] o_stack_top_value,
+    output reg o_stack_error
+    );
 
 (* ram_style = "block" *) reg [15:0] RAM [1023:0];
 reg [15:0] r_stack_pointer;

@@ -22,12 +22,11 @@
  
 
 module uart_receive(
-
-input clk, //input clock
-input reset, //input reset 
-input RxD, //input receving data line
-output reg [7:0]RxData, // output for 8 bits data
-output reg RxDV
+    input clk,      //input clock
+    input reset,    //input reset 
+    input RxD,      //input receving data line
+    output reg [7:0]RxData, // output for 8 bits data
+    output reg RxDV
     );
     
 //internal variables
