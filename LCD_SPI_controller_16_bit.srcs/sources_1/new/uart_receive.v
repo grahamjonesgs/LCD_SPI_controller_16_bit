@@ -1,34 +1,34 @@
 
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
+// Company:
+// Engineer:
+//
 // Create Date: 07/04/2015 12:03:40 PM
-// Design Name: 
+// Design Name:
 // Module Name: receiver
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
-// 
+// Project Name:
+// Target Devices:
+// Tool Versions:
+// Description:
+//
+// Dependencies:
+//
 // Revision:
 // Revision 0.01 - File Created
 // Additional Comments:
-// 
+//
 //////////////////////////////////////////////////////////////////////////////////
- 
+
 
 module uart_receive(
-    input clk,      //input clock
-    input reset,    //input reset 
-    input RxD,      //input receving data line
-    output reg [7:0]RxData, // output for 8 bits data
-    output reg RxDV
-    );
-    
+           input clk,      //input clock
+           input reset,    //input reset
+           input RxD,      //input receving data line
+           output reg [7:0]RxData, // output for 8 bits data
+           output reg RxDV
+       );
+
 //internal variables
 reg shift; // shift signal to trigger shifting data
 reg state, nextstate; // initial state and next state variable
@@ -54,73 +54,92 @@ end
 
 //UART receiver logic
 always @ (posedge clk)
-    begin 
-        if (reset)begin // if reset is asserted
-            state <=0; // set state to idle 
-            bitcounter <=0; // reset the bit counter
-            counter <=0; // reset the counter
-            samplecounter <=0; // reset the sample counter
-            //RxData=8'h0;
-        end else begin // if reset is not asserted
-            counter <= counter +1; // start count in the counter
-            if (counter >= div_counter-1) begin // if counter reach the baud rate with sampling 
-                counter <=0; //reset the counter
-                state <= nextstate; // assign the state to nextstate
-                if (shift)rxshiftreg <= {RxD,rxshiftreg[9:1]}; //if shift asserted, load the receiving data
-                if (clear_samplecounter) samplecounter <=0; // if clear sampl counter asserted, reset sample counter
-                if (inc_samplecounter) samplecounter <= samplecounter +1; //if increment counter asserted, start sample count
-                if (clear_bitcounter) bitcounter <=0; // if clear bit counter asserted, reset bit counter
-                if (inc_bitcounter)bitcounter <= bitcounter +1; // if increment bit counter asserted, start count bit counter
-            end
+begin
+    if (reset)
+    begin // if reset is asserted
+        state <=0; // set state to idle
+        bitcounter <=0; // reset the bit counter
+        counter <=0; // reset the counter
+        samplecounter <=0; // reset the sample counter
+        //RxData=8'h0;
+    end
+    else
+    begin // if reset is not asserted
+        counter <= counter +1; // start count in the counter
+        if (counter >= div_counter-1)
+        begin // if counter reach the baud rate with sampling
+            counter <=0; //reset the counter
+            state <= nextstate; // assign the state to nextstate
+            if (shift)
+                rxshiftreg <= {RxD,rxshiftreg[9:1]}; //if shift asserted, load the receiving data
+            if (clear_samplecounter)
+                samplecounter <=0; // if clear sampl counter asserted, reset sample counter
+            if (inc_samplecounter)
+                samplecounter <= samplecounter +1; //if increment counter asserted, start sample count
+            if (clear_bitcounter)
+                bitcounter <=0; // if clear bit counter asserted, reset bit counter
+            if (inc_bitcounter)
+                bitcounter <= bitcounter +1; // if increment bit counter asserted, start count bit counter
         end
     end
-   
+end
+
 //state machine
 
 always @ (posedge clk) //trigger by clock
-begin 
+begin
     RxDV<=1'b0;
-    shift <= 0; // set shift to 0 to avoid any shifting 
+    shift <= 0; // set shift to 0 to avoid any shifting
     clear_samplecounter <=0; // set clear sample counter to 0 to avoid reset
     inc_samplecounter <=0; // set increment sample counter to 0 to avoid any increment
     clear_bitcounter <=0; // set clear bit counter to 0 to avoid claring
     inc_bitcounter <=0; // set increment bit counter to avoid any count
     nextstate <=0; // set next state to be idle state
     case (state)
-        0: begin // idle state
+        0:
+        begin // idle state
             dvflagsent=1'b0;
             RxDV<=1'b0;
             if (RxD) // if input RxD data line asserted
-              begin
-              nextstate <=0; // back to idle state because RxD needs to be low to start transmission    
-              end
-            else begin // if input RxD data line is not asserted
-                nextstate <=1; //jump to receiving state 
+            begin
+                nextstate <=0; // back to idle state because RxD needs to be low to start transmission
+            end
+            else
+            begin // if input RxD data line is not asserted
+                nextstate <=1; //jump to receiving state
                 clear_bitcounter <=1; // trigger to clear bit counter
                 clear_samplecounter <=1; // trigger to clear sample counter
             end
         end
-        1: begin // receiving state
-            nextstate <= 1; // DEFAULT 
-            if (samplecounter== mid_sample - 1) shift <= 1; // if sample counter is 1, trigger shift 
-                if (samplecounter== div_sample - 1) begin // if sample counter is 3 as the sample rate used is 3
-                    if (bitcounter == div_bit - 1) begin // check if bit counter if 9 or not
-                nextstate <= 0; // back to idle state if bit counter is 9 as receving is complete
-                RxData = rxshiftreg [8:1];
-                if(dvflagsent==0) begin
-                    RxDV<=1'b1;
-                    dvflagsent<=1'b1;
+        1:
+        begin // receiving state
+            nextstate <= 1; // DEFAULT
+            if (samplecounter== mid_sample - 1)
+                shift <= 1; // if sample counter is 1, trigger shift
+            if (samplecounter== div_sample - 1)
+            begin // if sample counter is 3 as the sample rate used is 3
+                if (bitcounter == div_bit - 1)
+                begin // check if bit counter if 9 or not
+                    nextstate <= 0; // back to idle state if bit counter is 9 as receving is complete
+                    RxData = rxshiftreg [8:1];
+                    if(dvflagsent==0)
+                    begin
+                        RxDV<=1'b1;
+                        dvflagsent<=1'b1;
                     end
                     else
                     begin
-                    RxDV<=1'b0;
+                        RxDV<=1'b0;
                     end
-                end 
+                end
                 inc_bitcounter <=1; // trigger the increment bit counter if bit counter is not 9
                 clear_samplecounter <=1; //trigger the sample counter to reset the sample counter
-            end else inc_samplecounter <=1; // if sample is not equal to 3, keep counting
+            end
+            else
+                inc_samplecounter <=1; // if sample is not equal to 3, keep counting
         end
-       default: nextstate <=0; //default idle state
-     endcase
-end         
+        default:
+            nextstate <=0; //default idle state
+    endcase
+end
 endmodule
