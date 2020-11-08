@@ -175,6 +175,7 @@ rams_sp_nc rams_sp_nc1 (
     `include "control_tasks.vh"
     `include "stack_tasks.vh"
     `include "functions.vh"
+    `include "7_seg.vh"
 
 
 initial
@@ -352,7 +353,9 @@ begin
                         t_stack_push_value(w_var1);
                     16'h031?: t_stack_push_reg;
                     16'h032?: t_stack_pop_reg;
-
+                    
+                    16'h0210:
+                        t_7_seq_value(w_var1);
 
                     16'hFFFF:
                     begin
