@@ -196,10 +196,6 @@ set rc [catch {
   create_msg_db place_design.pb
 OPTRACE "read constraints: place_design" START { }
 OPTRACE "read constraints: place_design" END { }
-OPTRACE "read incremental checkpoint" START { }
-  read_checkpoint -auto_incremental  -incremental /home/graham/Documents/LCD_SPI_controller_16_bit/LCD_SPI_controller_16_bit.srcs/utils_1/imports/impl_1/LCD_SPI_controller_16_bit_routed.dcp
-  catch { report_incremental_reuse -file LCD_SPI_controller_16_bit_incremental_reuse_pre_placed.rpt }
-OPTRACE "read incremental checkpoint" END { }
   if { [llength [get_debug_cores -quiet] ] > 0 }  { 
 OPTRACE "implement_debug_core" START { }
     implement_debug_core 

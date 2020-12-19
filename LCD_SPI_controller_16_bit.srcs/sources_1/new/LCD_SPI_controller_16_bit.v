@@ -354,8 +354,8 @@ begin
                     16'h031?: t_stack_push_reg;
                     16'h032?: t_stack_pop_reg;
                     
-                    16'h0210:
-                        t_7_seq_value(w_var1);
+                    16'h2100:
+                        t_7_seg_value(w_var1);
 
                     16'hFFFF:
                     begin

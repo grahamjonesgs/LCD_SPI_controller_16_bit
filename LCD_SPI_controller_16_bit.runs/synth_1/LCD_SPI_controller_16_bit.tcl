@@ -70,6 +70,7 @@ proc create_report { reportName command } {
   }
 }
 OPTRACE "synth_1" START { ROLLUP_AUTO }
+set_param chipscope.maxJobs 1
 OPTRACE "Creating in-memory project" START { }
 create_project -in_memory -part xc7a35tcpg236-1
 
@@ -117,8 +118,6 @@ read_xdc /home/graham/Documents/LCD_SPI_controller_16_bit/LCD_SPI_controller_16_
 set_property used_in_implementation false [get_files /home/graham/Documents/LCD_SPI_controller_16_bit/LCD_SPI_controller_16_bit.srcs/constrs_1/imports/imports/new/Basys.xdc]
 
 set_param ips.enableIPCacheLiteLoad 1
-
-read_checkpoint -auto_incremental -incremental /home/graham/Documents/LCD_SPI_controller_16_bit/LCD_SPI_controller_16_bit.srcs/utils_1/imports/synth_1/LCD_SPI_controller_16_bit.dcp
 close [open __synthesis_is_running__ w]
 
 OPTRACE "synth_design" START { }
@@ -129,7 +128,7 @@ OPTRACE "synth_design" END { }
 OPTRACE "write_checkpoint" START { CHECKPOINT }
 # disable binary constraint mode for synth run checkpoints
 set_param constraints.enableBinaryConstraints false
-write_checkpoint -force -noxdef -incremental_synth LCD_SPI_controller_16_bit.dcp
+write_checkpoint -force -noxdef LCD_SPI_controller_16_bit.dcp
 OPTRACE "write_checkpoint" END { }
 OPTRACE "synth reports" START { REPORT }
 create_report "synth_1_synth_report_utilization_0" "report_utilization -file LCD_SPI_controller_16_bit_utilization_synth.rpt -pb LCD_SPI_controller_16_bit_utilization_synth.pb"
