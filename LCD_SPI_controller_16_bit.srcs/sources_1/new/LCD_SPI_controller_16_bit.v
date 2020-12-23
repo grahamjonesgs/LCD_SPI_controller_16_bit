@@ -19,7 +19,7 @@
 // Additional Comments:
 //
 //////////////////////////////////////////////////////////////////////////////////
-  
+   
 
 module LCD_SPI_controller_16_bit(
            input        i_Rst_H,     // FPGA Reset
@@ -150,7 +150,7 @@ rams_sp_nc rams_sp_nc1 (
                .write_en(o_ram_write_DV)
            );
 
-/* ila_0  myila(.clk(i_Clk),
+ ila_0  myila(.clk(i_Clk),
  .probe0(w_opcode),
  .probe1(r_check_number),
  .probe2(r_PC),
@@ -166,7 +166,7 @@ rams_sp_nc rams_sp_nc1 (
  .probe12(o_LCD_DC),
  .probe13(o_LCD_reset_n),
  .probe14(r_zero_flag),
- .probe15(1'b0));*/
+ .probe15(1'b0));
 
 `include "timing_tasks.vh"
     `include "LCD_tasks.vh"
