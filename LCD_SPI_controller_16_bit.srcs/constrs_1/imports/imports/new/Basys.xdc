@@ -63,10 +63,13 @@ set_property IOSTANDARD LVCMOS33 [get_ports i_Rst_H]
 
 	
 set_property PACKAGE_PIN U16 [get_ports o_led]					
-	set_property IOSTANDARD LVCMOS33 [get_ports o_led]
+set_property IOSTANDARD LVCMOS33 [get_ports o_led]
 set_property PACKAGE_PIN E19 [get_ports o_led_2]
 set_property IOSTANDARD LVCMOS33 [get_ports o_led_2]	
 	
 set_property PACKAGE_PIN B18 [get_ports i_uart_rx]
 set_property IOSTANDARD LVCMOS33 [get_ports i_uart_rx]
+
+set_property CONFIG_VOLTAGE 3.3 [current_design]
+set_property CFGBVS VCCO [current_design]
  

@@ -88,10 +88,12 @@ reg          r_error_display_type;
 
 // Stack control
 wire [15:0]  i_stack_top_value;
+wire [15:0]  i_stack_peek_value;
 wire         i_stack_error;
 reg          o_stack_read_flag;
 reg          o_stack_write_flag;
 reg  [15:0]  o_stack_write_value;
+//reg  [15:0]  o_stack_peek_pointer;
 
 // DEBUG
 reg  [7:0]   rx_count;
@@ -108,8 +110,11 @@ stack main_stack (
           .i_reset(i_Rst_H),
           .i_read_flag(o_stack_read_flag),
           .i_write_flag(o_stack_write_flag),
+          //.i_peek_pointer(o_stack_peek_pointer),
+          .i_peek_pointer(w_var1),
           .i_write_value(o_stack_write_value),
           .o_stack_top_value(i_stack_top_value),
+          .o_stack_peek_value(i_stack_peek_value),
           .o_stack_error(i_stack_error));
 
 Seven_seg_LED_Display_Controller Seven_seg_LED_Display_Controller1 (
@@ -190,7 +195,7 @@ begin
     r_error_code=8'h0;
     r_timeout_counter=32'b0;
     r_seven_seg_value=32'h20_10_00_01;
-    o_led_2=1'b1;
+    o_led_2=1'b0;
     rx_count=8'b0;
     o_ram_write_addr=12'h0;
     r_ram_next_write_addr=12'h0;
@@ -217,7 +222,6 @@ begin
     end // if (i_Rst_H)
     else if(w_uart_rx_DV&w_uart_rx_value==8'h53) // Load start flag received
     begin
-        o_led_2 <=~o_led_2;
         r_SM_msg<=LOADING_BYTE;
         r_load_byte_counter<=0;
         o_ram_write_addr<=12'h0;
@@ -311,7 +315,6 @@ begin
             end
             OPCODE_EXECUTE:
             begin
-                //r_ram_read_DV<=0;
                 casez(w_opcode[15:0])
 
                     16'h2001:
@@ -353,6 +356,7 @@ begin
                         t_stack_push_value(w_var1);
                     16'h031?: t_stack_push_reg;
                     16'h032?: t_stack_pop_reg;
+                    16'h033?: t_stack_peek_reg;
                     
                     16'h2100:
                         t_7_seg_value(w_var1);

@@ -48,7 +48,8 @@
 // Stack
 // 16'h0300 - Push value onto stack
 // 16'h031x - Push reg onto stack
-// 16'h032x - pop reg from stack
+// 16'h032x - Pop reg from stack
+// 16'h033x - Peek reg from stack minus value
 //
 // 16'h0210 - Set 7 seg value, takes two operands
 //
@@ -69,9 +70,9 @@
 
 //LOOP1:
 2004 0001           //LED 1
-2003 03E7           //DELAYV 999
+2003 FFFF           //DELAYV 999
 2004 0000           //LED 0
-2003 03E7           //DELAYV 999
+2003 FFFF           //DELAYV 999
 0210 0000           //JMP LOOP1:
 
 //START:

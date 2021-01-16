@@ -7,7 +7,9 @@ module stack (
            input i_read_flag,
            input i_write_flag,
            input [15:0] i_write_value,
+           input [15:0] i_peek_pointer,
            output reg [15:0] o_stack_top_value,
+           output reg [15:0] o_stack_peek_value,
            output reg o_stack_error
        );
 
@@ -77,6 +79,7 @@ end // always clock
 always @(posedge clk)
 begin
     o_stack_top_value<=RAM[r_stack_pointer-1];
+    o_stack_peek_value=RAM[r_stack_pointer-i_peek_pointer];
 end
 
 endmodule
