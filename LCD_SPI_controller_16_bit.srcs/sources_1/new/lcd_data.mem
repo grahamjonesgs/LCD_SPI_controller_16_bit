@@ -51,7 +51,8 @@
 // 16'h032x - Pop reg from stack
 // 16'h033x - Peek reg from stack minus value
 //
-// 16'h0210 - Set 7 seg value, takes two operands
+// 16'h2100 - Set 7 seg value
+// 16'h211x - Set 7 seg register
 //
 //
 // 16'hFFFF - reset to PC=0

@@ -8,6 +8,7 @@ module stack (
            input i_write_flag,
            input [15:0] i_write_value,
            input [15:0] i_peek_pointer,
+           input i_stack_reset,
            output reg [15:0] o_stack_top_value,
            output reg [15:0] o_stack_peek_value,
            output reg o_stack_error
@@ -15,17 +16,17 @@ module stack (
 
 (* ram_style = "block" *) reg [15:0] RAM [1023:0];
 reg [15:0] r_stack_pointer;
-
-/*   ila_0  myila2(.clk(clk),
+ 
+ /*  ila_0  myila2(.clk(clk),
    .probe0(o_stack_top_value),
    .probe1(r_stack_pointer),
    .probe2(r_PC),
-   .probe3(i_write_value),
+   .probe3(i_peek_pointer),
    .probe4(o_stack_top_value),
-   .probe5(1'b0),
-   .probe6(1'b0),
-   .probe7(1'b0),
-   .probe8(1'b0),
+   .probe5(i_peek_pointer),
+   .probe6(o_stack_peek_value),
+   .probe7(i_write_value),
+   .probe8(w_opcode),
    .probe9(1'b0),
    .probe10(1'b0),
    .probe11(1'b0),
@@ -43,7 +44,7 @@ end
 
 always @(posedge clk)
 begin
-    if (i_reset)
+    if (i_reset||i_stack_reset)
     begin
         r_stack_pointer<=15'h0;
         o_stack_error<=1'b0;
@@ -79,7 +80,7 @@ end // always clock
 always @(posedge clk)
 begin
     o_stack_top_value<=RAM[r_stack_pointer-1];
-    o_stack_peek_value=RAM[r_stack_pointer-i_peek_pointer];
+    o_stack_peek_value<=RAM[r_stack_pointer-i_peek_pointer];
 end
 
 endmodule

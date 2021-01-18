@@ -70,9 +70,12 @@ proc create_report { reportName command } {
   }
 }
 OPTRACE "ila_0_synth_1" START { ROLLUP_AUTO }
+set_param chipscope.maxJobs 1
 set_param tcl.collectionResultDisplayLimit 0
 set_param xicom.use_bs_reader 1
-set_param chipscope.maxJobs 1
+set_param synth.incrementalSynthesisCache ./.Xil/Vivado-82597-ubuntu/incrSyn
+set_msg_config -id {Synth 8-256} -limit 10000
+set_msg_config -id {Synth 8-638} -limit 10000
 set_param project.vivado.isBlockSynthRun true
 set_msg_config -msgmgr_mode ooc_run
 OPTRACE "Creating in-memory project" START { }
@@ -87,7 +90,6 @@ set_property parent.project_path /home/graham/Documents/LCD_SPI_controller_16_bi
 set_property XPM_LIBRARIES {XPM_CDC XPM_MEMORY} [current_project]
 set_property default_lib xil_defaultlib [current_project]
 set_property target_language Verilog [current_project]
-set_property board_part digilentinc.com:basys3:part0:1.1 [current_project]
 set_property ip_output_repo /home/graham/Documents/LCD_SPI_controller_16_bit/LCD_SPI_controller_16_bit.cache/ip [current_project]
 set_property ip_cache_permissions {read write} [current_project]
 OPTRACE "Creating in-memory project" END { }
@@ -151,6 +153,9 @@ catch {
  }
 OPTRACE "Write IP Cache" END { }
 }
+if { [get_msg_config -count -severity {CRITICAL WARNING}] > 0 } {
+ send_msg_id runtcl-6 info "Synthesis results are not added to the cache due to CRITICAL_WARNING"
+}
 
 rename_ref -prefix_all ila_0_
 
@@ -166,7 +171,7 @@ OPTRACE "synth reports" END { }
 if { [catch {
   file copy -force /home/graham/Documents/LCD_SPI_controller_16_bit/LCD_SPI_controller_16_bit.runs/ila_0_synth_1/ila_0.dcp /home/graham/Documents/LCD_SPI_controller_16_bit/LCD_SPI_controller_16_bit.srcs/sources_1/ip/ila_0/ila_0.dcp
 } _RESULT ] } { 
-  send_msg_id runtcl-3 error "ERROR: Unable to successfully create or copy the sub-design checkpoint file."
+  send_msg_id runtcl-3 status "ERROR: Unable to successfully create or copy the sub-design checkpoint file."
   error "ERROR: Unable to successfully create or copy the sub-design checkpoint file."
 }
 
@@ -201,7 +206,7 @@ if { [catch {
 if { [catch {
   file copy -force /home/graham/Documents/LCD_SPI_controller_16_bit/LCD_SPI_controller_16_bit.runs/ila_0_synth_1/ila_0.dcp /home/graham/Documents/LCD_SPI_controller_16_bit/LCD_SPI_controller_16_bit.srcs/sources_1/ip/ila_0/ila_0.dcp
 } _RESULT ] } { 
-  send_msg_id runtcl-3 error "ERROR: Unable to successfully create or copy the sub-design checkpoint file."
+  send_msg_id runtcl-3 status "ERROR: Unable to successfully create or copy the sub-design checkpoint file."
   error "ERROR: Unable to successfully create or copy the sub-design checkpoint file."
 }
 

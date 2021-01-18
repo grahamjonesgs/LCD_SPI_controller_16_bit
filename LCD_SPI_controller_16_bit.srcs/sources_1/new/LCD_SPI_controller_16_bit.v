@@ -20,7 +20,7 @@
 //
 //////////////////////////////////////////////////////////////////////////////////
    
-
+ 
 module LCD_SPI_controller_16_bit(
            input        i_Rst_H,     // FPGA Reset
            input        i_Clk,       // FPGA Clock
@@ -38,7 +38,7 @@ module LCD_SPI_controller_16_bit(
        );
 
 parameter STACK_SIZE=1024;
-parameter OPCODE_REQUEST=4'h0, OPCODE_FETCH=4'h1, OPCODE_EXECUTE=4'h2, HCF_1=4'h3,HCF_2=4'h4,  HCF_3=4'h5, HCF_4=4'h6;
+parameter OPCODE_REQUEST=4'h0, OPCODE_FETCH=4'h1, OPCODE_FETCH2=4'h2, OPCODE_EXECUTE=4'h3, HCF_1=4'h4,HCF_2=4'h5,  HCF_3=4'h6, HCF_4=4'h7;
 parameter LOAD_START=4'h7, LOADING_BYTE=4'h8, LOAD_COMPLETE=4'hC;
 parameter ERR_INV_OPCODE=8'h1, ERR_INV_FSM_STATE=8'h2, ERR_STACK=8'h3, ERR_LOAD=8'h4;
 
@@ -67,6 +67,7 @@ reg  [11:0]  r_PC;
 wire [15:0]  w_opcode;
 wire [15:0]  w_var1;
 wire [15:0]  w_var2;
+reg          r_extra_cycle;
 
 //load control
 reg          o_ram_write_DV;
@@ -90,14 +91,15 @@ reg          r_error_display_type;
 wire [15:0]  i_stack_top_value;
 wire [15:0]  i_stack_peek_value;
 wire         i_stack_error;
-reg          o_stack_read_flag;
-reg          o_stack_write_flag;
-reg  [15:0]  o_stack_write_value;
+reg          r_stack_read_flag;
+reg          r_stack_write_flag;
+reg  [15:0]  r_stack_write_value;
+reg          r_stack_reset;
 //reg  [15:0]  o_stack_peek_pointer;
 
 // DEBUG
 reg  [7:0]   rx_count;
-
+ 
 uart_receive uart_receive1(
                  .clk(i_Clk), //input clock
                  .reset(i_Rst_H), //input reset
@@ -108,11 +110,11 @@ uart_receive uart_receive1(
 stack main_stack (
           .clk(i_Clk),
           .i_reset(i_Rst_H),
-          .i_read_flag(o_stack_read_flag),
-          .i_write_flag(o_stack_write_flag),
-          //.i_peek_pointer(o_stack_peek_pointer),
+          .i_read_flag(r_stack_read_flag),
+          .i_write_flag(r_stack_write_flag),
           .i_peek_pointer(w_var1),
-          .i_write_value(o_stack_write_value),
+          .i_write_value(r_stack_write_value),
+          .i_stack_reset(r_stack_reset),
           .o_stack_top_value(i_stack_top_value),
           .o_stack_peek_value(i_stack_peek_value),
           .o_stack_error(i_stack_error));
@@ -155,7 +157,7 @@ rams_sp_nc rams_sp_nc1 (
                .write_en(o_ram_write_DV)
            );
 
- ila_0  myila(.clk(i_Clk),
+ /*ila_0  myila(.clk(i_Clk),
  .probe0(w_opcode),
  .probe1(r_check_number),
  .probe2(r_PC),
@@ -171,7 +173,7 @@ rams_sp_nc rams_sp_nc1 (
  .probe12(o_LCD_DC),
  .probe13(o_LCD_reset_n),
  .probe14(r_zero_flag),
- .probe15(1'b0));
+ .probe15(1'b0));*/
 
 `include "timing_tasks.vh"
     `include "LCD_tasks.vh"
@@ -199,6 +201,8 @@ begin
     rx_count=8'b0;
     o_ram_write_addr=12'h0;
     r_ram_next_write_addr=12'h0;
+    r_extra_cycle=1'b0;
+    r_stack_reset=1'b0;
 end
 
 
@@ -219,6 +223,8 @@ begin
         o_ram_write_addr<=12'h0;
         r_ram_next_write_addr<=12'h0;
         r_seven_seg_value=32'h20_10_00_03;
+        r_extra_cycle=1'b0;
+        r_stack_reset=1'b0;
     end // if (i_Rst_H)
     else if(w_uart_rx_DV&w_uart_rx_value==8'h53) // Load start flag received
     begin
@@ -233,48 +239,52 @@ begin
             LOADING_BYTE:
             begin
                 o_ram_write_DV<=1'b0;
-                //r_seven_seg_value<={4'h2,4'h4,4'h0,o_ram_write_addr[11:8],4'h0,o_ram_write_addr[7:4],4'h0,o_ram_write_addr[3:0]};
-                r_seven_seg_value<={8'h24,4'h0,r_ram_next_write_addr[7:4],4'h0,r_ram_next_write_addr[7:4],4'h0,r_ram_next_write_addr[3:0]};
+                r_stack_reset<=1'b1;
+                r_seven_seg_value<={8'h24,4'h0,r_ram_next_write_addr[11:8],4'h0,r_ram_next_write_addr[7:4],4'h0,r_ram_next_write_addr[3:0]};
                 if (w_uart_rx_DV)
                 begin
-                    if(w_uart_rx_value==8'h58) // X end of program
-                    begin
-                        if (r_load_byte_counter==0)
+                    case(w_uart_rx_value)
+                        8'h58: // End char
                         begin
-                            r_SM_msg<=LOAD_COMPLETE;
-                        end // (r_load_byte_counter==3)
-                        else
+                            if (r_load_byte_counter==0)
+                            begin
+                                r_SM_msg<=LOAD_COMPLETE;
+                            end // (r_load_byte_counter==0)
+                            else
+                            begin
+                                r_SM_msg<=HCF_1; // Halt and catch fire error
+                                r_error_code<=ERR_LOAD;
+                            end // else (r_load_byte_counter==3)
+                        end // case 8'h58
+                        8'h0a: ; // ignore LF
+                        8'h0d: ; // ignore CR           
+                        default:
                         begin
-                            r_SM_msg<=HCF_1; // Halt and catch fire error
-                            r_error_code<=ERR_LOAD;
-                        end // else (r_load_byte_counter==3)
-                    end // if(w_uart_rx_value==8'h58)
-                    else
-                    begin
-                        case (r_load_byte_counter)
-                            0:
-                                o_ram_write_value[15:12]<=return_hex_from_ascii(w_uart_rx_value);
-                            1:
-                                o_ram_write_value[11:8]<=return_hex_from_ascii(w_uart_rx_value);
-                            2:
-                                o_ram_write_value[7:4]<=return_hex_from_ascii(w_uart_rx_value);
-                            3:
-                                o_ram_write_value[3:0]<=return_hex_from_ascii(w_uart_rx_value);
-                            default:
-                                ;
-                        endcase
-                        if (r_load_byte_counter==3)
-                        begin
-                            r_load_byte_counter<=0;
-                            o_ram_write_addr<=r_ram_next_write_addr;
-                            r_ram_next_write_addr<=r_ram_next_write_addr+1;
-                            o_ram_write_DV<=1'b1;
-                        end
-                        else
-                        begin
-                            r_load_byte_counter<=r_load_byte_counter+1;
-                        end
-                    end // else if(w_uart_rx_value==8'h58)
+                            case (r_load_byte_counter)
+                                0:
+                                    o_ram_write_value[15:12]<=return_hex_from_ascii(w_uart_rx_value);
+                                1:
+                                    o_ram_write_value[11:8]<=return_hex_from_ascii(w_uart_rx_value);
+                                2:
+                                    o_ram_write_value[7:4]<=return_hex_from_ascii(w_uart_rx_value);
+                                3:
+                                    o_ram_write_value[3:0]<=return_hex_from_ascii(w_uart_rx_value);
+                                default:
+                                    ;
+                            endcase //r_load_byte_counter
+                            if (r_load_byte_counter==3)
+                            begin
+                                r_load_byte_counter<=0;
+                                o_ram_write_addr<=r_ram_next_write_addr;
+                                r_ram_next_write_addr<=r_ram_next_write_addr+1;
+                                o_ram_write_DV<=1'b1;
+                            end // if (r_load_byte_counter==3)
+                            else
+                            begin
+                                r_load_byte_counter<=r_load_byte_counter+1;
+                            end // else if (r_load_byte_counter==3)
+                        end // case default
+                    endcase // w_uart_rx_value
                 end
             end
 
@@ -291,12 +301,13 @@ begin
                 r_error_code<=8'h0;
                 rx_count<=8'b0;
                 o_ram_write_addr<=12'h0;
+                r_stack_reset<=1'b0;
             end
 
             OPCODE_REQUEST:
             begin
-                o_stack_write_flag<=1'b0;
-                o_stack_read_flag<=1'b0;
+                r_stack_write_flag<=1'b0;
+                r_stack_read_flag<=1'b0;
                 if(i_stack_error)
                 begin
                     r_SM_msg<=HCF_1; // Halt and catch fire error 1
@@ -311,6 +322,11 @@ begin
             OPCODE_FETCH:
             begin
                 r_ram_read_DV<=0;
+                //r_SM_msg<=OPCODE_FETCH2;
+                r_SM_msg<=OPCODE_EXECUTE;
+            end
+            OPCODE_FETCH2:
+            begin
                 r_SM_msg<=OPCODE_EXECUTE;
             end
             OPCODE_EXECUTE:
@@ -360,6 +376,8 @@ begin
                     
                     16'h2100:
                         t_7_seg_value(w_var1);
+                    16'h211?:
+                        t_7_seg_reg(w_var1);
 
                     16'hFFFF:
                     begin
@@ -375,8 +393,8 @@ begin
             end // case OPCODE_EXECUTE
             HCF_1:
             begin
-                o_stack_write_flag<=1'b0;
-                o_stack_read_flag<=1'b0;
+                r_stack_write_flag<=1'b0;
+                r_stack_read_flag<=1'b0;
                 r_timeout_counter<=0;
                 r_SM_msg<=HCF_2;
             end
