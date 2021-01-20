@@ -16,25 +16,6 @@ module stack (
 
 (* ram_style = "block" *) reg [15:0] RAM [1023:0];
 reg [15:0] r_stack_pointer;
- 
- /*  ila_0  myila2(.clk(clk),
-   .probe0(o_stack_top_value),
-   .probe1(r_stack_pointer),
-   .probe2(r_PC),
-   .probe3(i_peek_pointer),
-   .probe4(o_stack_top_value),
-   .probe5(i_peek_pointer),
-   .probe6(o_stack_peek_value),
-   .probe7(i_write_value),
-   .probe8(w_opcode),
-   .probe9(1'b0),
-   .probe10(1'b0),
-   .probe11(1'b0),
-   .probe12(1'b0),
-   .probe13(o_stack_error),
-   .probe14(i_write_flag),
-   .probe15(i_read_flag)); */
-
 
 initial
 begin

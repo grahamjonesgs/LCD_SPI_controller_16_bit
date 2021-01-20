@@ -38,8 +38,8 @@ module LCD_SPI_controller_16_bit(
        );
 
 parameter STACK_SIZE=1024;
-parameter OPCODE_REQUEST=4'h0, OPCODE_FETCH=4'h1, OPCODE_FETCH2=4'h2, OPCODE_EXECUTE=4'h3, HCF_1=4'h4,HCF_2=4'h5,  HCF_3=4'h6, HCF_4=4'h7;
-parameter LOAD_START=4'h7, LOADING_BYTE=4'h8, LOAD_COMPLETE=4'hC;
+parameter OPCODE_REQUEST=16'h1, OPCODE_FETCH=16'h2, OPCODE_EXECUTE=16'h4, HCF_1=16'h8,HCF_2=16'h16,  HCF_3=16'h32, HCF_4=16'h64;
+parameter LOAD_START=16'h128, LOADING_BYTE=16'h256, LOAD_COMPLETE=16'h512;
 parameter ERR_INV_OPCODE=8'h1, ERR_INV_FSM_STATE=8'h2, ERR_STACK=8'h3, ERR_LOAD=8'h4;
 
 // UART receive control
@@ -61,7 +61,7 @@ reg  [31:0]  r_timeout_counter;
 reg  [31:0]  r_timeout_max;
 
 // Machine control
-reg  [3:0]   r_SM_msg;
+reg  [15:0]   r_SM;
 reg          r_ram_read_DV;
 reg  [11:0]  r_PC;
 wire [15:0]  w_opcode;
@@ -161,7 +161,7 @@ rams_sp_nc rams_sp_nc1 (
  .probe0(w_opcode),
  .probe1(r_check_number),
  .probe2(r_PC),
- .probe3(r_SM_msg),
+ .probe3(r_SM),
  .probe4(w_uart_rx_value),
  .probe5(o_TX_LCD_Byte),
  .probe6(8'b0),
@@ -184,12 +184,11 @@ rams_sp_nc rams_sp_nc1 (
     `include "functions.vh"
     `include "7_seg.vh"
 
-
 initial
 begin
     o_TX_LCD_Count=4'd1;
     o_TX_LCD_Byte=8'b0;
-    r_SM_msg=OPCODE_REQUEST;
+    r_SM=OPCODE_REQUEST;
     r_timeout_counter=0;
     o_LCD_reset_n=1'b0;
     r_PC=12'h0;
@@ -205,21 +204,19 @@ begin
     r_stack_reset=1'b0;
 end
 
-
 always @(posedge i_Clk)
 begin
     if (i_Rst_H)
     begin
         o_TX_LCD_Count<=4'd1;
         o_TX_LCD_Byte<=8'b0;
-        r_SM_msg<=OPCODE_REQUEST;
+        r_SM<=OPCODE_REQUEST;
         r_timeout_counter<=0;
         o_LCD_reset_n<=1'b0;
         r_PC<=12'h0;
         r_zero_flag<=0;
         r_error_code<=8'h0;
         rx_count<=8'b0;
-
         o_ram_write_addr<=12'h0;
         r_ram_next_write_addr<=12'h0;
         r_seven_seg_value=32'h20_10_00_03;
@@ -228,14 +225,14 @@ begin
     end // if (i_Rst_H)
     else if(w_uart_rx_DV&w_uart_rx_value==8'h53) // Load start flag received
     begin
-        r_SM_msg<=LOADING_BYTE;
+        r_SM<=LOADING_BYTE;
         r_load_byte_counter<=0;
         o_ram_write_addr<=12'h0;
         r_ram_next_write_addr<=12'h0;
     end
     else
     begin
-        case(r_SM_msg)
+        case(r_SM)
             LOADING_BYTE:
             begin
                 o_ram_write_DV<=1'b0;
@@ -248,11 +245,11 @@ begin
                         begin
                             if (r_load_byte_counter==0)
                             begin
-                                r_SM_msg<=LOAD_COMPLETE;
+                                r_SM<=LOAD_COMPLETE;
                             end // (r_load_byte_counter==0)
                             else
                             begin
-                                r_SM_msg<=HCF_1; // Halt and catch fire error
+                                r_SM<=HCF_1; // Halt and catch fire error
                                 r_error_code<=ERR_LOAD;
                             end // else (r_load_byte_counter==3)
                         end // case 8'h58
@@ -293,7 +290,7 @@ begin
                 r_seven_seg_value=32'h20_10_00_02;
                 o_TX_LCD_Count<=4'd1;
                 o_TX_LCD_Byte<=8'b0;
-                r_SM_msg<=OPCODE_REQUEST;
+                r_SM<=OPCODE_REQUEST;
                 r_timeout_counter<=0;
                 o_LCD_reset_n<=1'b0;
                 r_PC<=12'h0;
@@ -310,25 +307,28 @@ begin
                 r_stack_read_flag<=1'b0;
                 if(i_stack_error)
                 begin
-                    r_SM_msg<=HCF_1; // Halt and catch fire error 1
+                    r_SM<=HCF_1; // Halt and catch fire error 1
                     r_error_code<=ERR_STACK;
                 end // default case
                 else
                 begin
                     r_ram_read_DV<=1;
-                    r_SM_msg<=OPCODE_FETCH;
+                    r_SM<=OPCODE_FETCH;
                 end
             end
+            
             OPCODE_FETCH:
             begin
                 r_ram_read_DV<=0;
-                //r_SM_msg<=OPCODE_FETCH2;
-                r_SM_msg<=OPCODE_EXECUTE;
+                //r_SM<=OPCODE_FETCH2;
+                r_SM<=OPCODE_EXECUTE;
             end
-            OPCODE_FETCH2:
+            
+            /*OPCODE_FETCH2:
             begin
-                r_SM_msg<=OPCODE_EXECUTE;
-            end
+                r_SM<=OPCODE_EXECUTE;
+            end*/
+            
             OPCODE_EXECUTE:
             begin
                 casez(w_opcode[15:0])
@@ -381,12 +381,12 @@ begin
 
                     16'hFFFF:
                     begin
-                        r_SM_msg<=OPCODE_REQUEST;
+                        r_SM<=OPCODE_REQUEST;
                         r_PC<=12'h0;
                     end // Case FFFF
                     default:
                     begin
-                        r_SM_msg<=HCF_1; // Halt and catch fire error 1
+                        r_SM<=HCF_1; // Halt and catch fire error 1
                         r_error_code<=ERR_INV_OPCODE;
                     end // default case
                 endcase //casez(w_opcode[15:0])
@@ -396,18 +396,17 @@ begin
                 r_stack_write_flag<=1'b0;
                 r_stack_read_flag<=1'b0;
                 r_timeout_counter<=0;
-                r_SM_msg<=HCF_2;
+                r_SM<=HCF_2;
             end
             HCF_2:
             begin
                 r_seven_seg_value[31:8]<=24'h230C0F;
                 r_seven_seg_value[7:0]<=r_error_code;
-                //r_seven_seg_value[31:0]<={4'h0,w_uart_rx_value[7:4],4'h0,w_uart_rx_value[3:0],4'h0,rx_count[7:4],4'h0,rx_count[3:0]};
                 r_timeout_max<=32'd100_000_000;
                 if(r_timeout_counter>=r_timeout_max)
                 begin
                     r_timeout_counter<=0;
-                    r_SM_msg<=HCF_3;
+                    r_SM<=HCF_3;
                 end  // if(r_timeout_counter>=DELAY_TIME)
                 else
                 begin
@@ -417,7 +416,7 @@ begin
             HCF_3:
             begin
                 r_timeout_counter<=0;
-                r_SM_msg<=HCF_4;
+                r_SM<=HCF_4;
                 r_error_display_type<=~r_error_display_type;
             end
             HCF_4:
@@ -426,11 +425,11 @@ begin
                     r_seven_seg_value<={4'h2,4'h2,4'h0,r_PC[11:8],4'h0,r_PC[7:4],4'h0,r_PC[3:0]};
                 else
                     r_seven_seg_value<={4'h0,w_opcode[15:12],4'h0,w_opcode[11:8],4'h0,w_opcode[7:4],4'h0,w_opcode[3:0]};
-                r_timeout_max<=32'd100_000_000;
+                    r_timeout_max<=32'd100_000_000;
                 if(r_timeout_counter>=r_timeout_max)
                 begin
                     r_timeout_counter<=0;
-                    r_SM_msg<=HCF_1;
+                    r_SM<=HCF_1;
                 end  // if(r_timeout_counter>=DELAY_TIME)
                 else
                 begin
@@ -440,8 +439,8 @@ begin
             end
 
             default:
-                r_SM_msg<=HCF_1; // loop in error
-        endcase // case(r_SM_msg)
+                r_SM<=HCF_1; // loop in error
+        endcase // case(r_SM)
     end // else if (i_Rst_H)
 end // always @(posedge i_Clk)
 

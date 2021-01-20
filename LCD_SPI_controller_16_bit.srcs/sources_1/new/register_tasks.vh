@@ -41,7 +41,7 @@ task t_copy_reg;
             7: r_temp_register=r_register[7]<=r_temp_register;
             default: ;
         endcase
-        r_SM_msg<=OPCODE_REQUEST;  
+        r_SM<=OPCODE_REQUEST;  
         r_PC<=r_PC+1;    
     end
 endtask 
@@ -64,7 +64,7 @@ task t_set_reg;
             7: r_register[7]<=i_value;
             default: ;
         endcase
-        r_SM_msg<=OPCODE_REQUEST;  
+        r_SM<=OPCODE_REQUEST;  
         r_PC<=r_PC+2;    
     end
 endtask 
@@ -119,7 +119,7 @@ endtask
         end
         default: ; 
         endcase  
-        r_SM_msg<=OPCODE_REQUEST;  
+        r_SM<=OPCODE_REQUEST;  
         r_PC<=r_PC+2; 
     end
 endtask 
@@ -175,7 +175,7 @@ endtask
         end
         default: ; 
         endcase  
-        r_SM_msg<=OPCODE_REQUEST;  
+        r_SM<=OPCODE_REQUEST;  
         r_PC<=r_PC+2; 
     end
 endtask 
@@ -229,7 +229,7 @@ endtask
         end
         default: ; 
         endcase  
-        r_SM_msg<=OPCODE_REQUEST;  
+        r_SM<=OPCODE_REQUEST;  
         r_PC<=r_PC+1; 
     end
 endtask 
@@ -283,7 +283,7 @@ endtask
         end
         default: ; 
         endcase  
-        r_SM_msg<=OPCODE_REQUEST;  
+        r_SM<=OPCODE_REQUEST;  
         r_PC<=r_PC+1; 
     end
 endtask
@@ -306,7 +306,7 @@ endtask
         7: r_equal_flag <= r_register[7]==i_value ? 1'b1 : 1'b0;
         default: ; 
         endcase  
-        r_SM_msg<=OPCODE_REQUEST;  
+        r_SM<=OPCODE_REQUEST;  
         r_PC<=r_PC+2; 
     end
 endtask 

@@ -7,7 +7,7 @@ task t_stack_push_value;
     begin
         r_stack_write_value<=i_value;
         r_stack_write_flag<=1'b1; // to move stack pointer
-        r_SM_msg<=OPCODE_REQUEST;  
+        r_SM<=OPCODE_REQUEST;  
         r_PC<=r_PC+2;    
     end
 endtask 
@@ -19,7 +19,7 @@ endtask
 task t_stack_push_reg;
     begin
         r_stack_write_flag<=1'b1;  // to move stack pointer
-        r_SM_msg<=OPCODE_REQUEST;  
+        r_SM<=OPCODE_REQUEST;  
         r_PC<=r_PC+1; 
         case(w_opcode[3:0])
         0: r_stack_write_value <= r_register[0];
@@ -53,20 +53,20 @@ task t_stack_pop_reg;
                 default: ; 
      endcase  
      r_stack_read_flag<=1'b1; // to move stack pointer
-     r_SM_msg<=OPCODE_REQUEST;  
+     r_SM<=OPCODE_REQUEST;  
      r_PC<=r_PC+1;  
      end
 endtask  
 
 
- ila_0  myila2(.clk(i_Clk),
+ /*ila_0  myila2(.clk(i_Clk),
  .probe0(w_opcode),
  .probe1(r_check_number),
  .probe2(r_PC),
  .probe3(i_stack_peek_value),
  .probe4(r_register[0]),
  .probe5(w_var1),
- .probe6(r_SM_msg),
+ .probe6(r_SM),
  .probe7(r_register[0]),
  .probe8(o_SPI_LCD_Clk),
  .probe9(i_SPI_LCD_MISO),
@@ -75,11 +75,11 @@ endtask
  .probe12(o_LCD_DC),
  .probe13(o_LCD_reset_n),
  .probe14(r_zero_flag),
- .probe15(1'b0));
+ .probe15(1'b0));*/
 // Pop register from stack
  // On completion
  // Increament PC 2
- // Increament r_SM_msg
+ // Increament r_SM
 task t_stack_peek_reg;
     begin
         if (r_extra_cycle==0)
@@ -99,7 +99,7 @@ task t_stack_peek_reg;
                 7: r_register[7] <= i_stack_peek_value;
                 default: ; 
             endcase  
-            r_SM_msg<=OPCODE_REQUEST;  
+            r_SM<=OPCODE_REQUEST;  
             r_PC<=r_PC+2; 
             r_extra_cycle<=0; 
         end // else if (r_extra_cycle==0)

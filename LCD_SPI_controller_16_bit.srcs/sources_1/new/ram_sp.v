@@ -14,7 +14,7 @@ input [11:0] write_addr;
 input [15:0] write_value;
 input write_en;
 
-(* ram_style = "block" *) reg [15:0] RAM [4095:0];
+(* ram_style = "block" *) reg [15:0] RAM [8191:0];
 reg [15:0] dout_opcode;
 reg [15:0] dout_var1;
 reg [15:0] dout_var2;

@@ -10,7 +10,7 @@
         if(r_timeout_counter>=r_timeout_max)  
         begin 
             r_timeout_counter<=0;
-            r_SM_msg<=OPCODE_REQUEST;
+            r_SM<=OPCODE_REQUEST;
             r_PC<=r_PC+2;
         end  // if(r_timeout_counter>=DELAY_TIME)
         else
@@ -43,7 +43,7 @@ endtask
         if(r_timeout_counter>=r_timeout_max)  
         begin 
             r_timeout_counter<=0;
-            r_SM_msg<=OPCODE_REQUEST;
+            r_SM<=OPCODE_REQUEST;
             r_PC<=r_PC+1;
         end  // if(r_timeout_counter>=DELAY_TIME)
         else
