@@ -31,6 +31,8 @@
 // 0209 Jump if not zero
 // 020A Jump if equal
 // 020B Jump if not equal
+// 020C Call
+// 020D Ret
 //
 // 0210 Jump
 // 

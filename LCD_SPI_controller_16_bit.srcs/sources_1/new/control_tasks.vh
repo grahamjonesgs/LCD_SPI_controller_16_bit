@@ -104,3 +104,20 @@ endtask
     end
 endtask       
  
+ task t_call;
+    input [15:0] i_value; 
+    begin
+       r_stack_write_value=r_PC;   // push PC on stack
+       r_stack_write_flag<=1'b1;  // to move stack pointer
+       r_SM<=OPCODE_REQUEST;  
+       r_PC<=i_value;    
+    end
+endtask  
+
+ task t_ret; 
+    begin
+       r_stack_read_flag<=1'b1;  // to move stack pointer
+       r_SM<=OPCODE_REQUEST;     // Pop PC from stack plus 2 to jump over call
+       r_PC<=i_stack_top_value+2;    
+    end
+endtask  
