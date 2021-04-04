@@ -36,7 +36,7 @@ module LCD_SPI_controller_16_bit(
            output      [3:0]   o_Anode_Activate, // anode signals of the 7-segment LED display
            output      [7:0]   o_LED_cathode// cathode patterns of the 7-segment LED display
        );
-
+ 
 parameter STACK_SIZE=1024;
 parameter OPCODE_REQUEST=16'h1, OPCODE_FETCH=16'h2, OPCODE_EXECUTE=16'h4, HCF_1=16'h8,HCF_2=16'h16,  HCF_3=16'h32, HCF_4=16'h64;
 parameter LOAD_START=16'h128, LOADING_BYTE=16'h256, LOAD_COMPLETE=16'h512;
@@ -61,7 +61,7 @@ reg  [31:0]  r_timeout_counter;
 reg  [31:0]  r_timeout_max;
 
 // Machine control
-reg  [15:0]   r_SM;
+reg  [15:0]  r_SM;
 reg          r_ram_read_DV;
 reg  [11:0]  r_PC;
 wire [15:0]  w_opcode;
@@ -320,15 +320,9 @@ begin
             OPCODE_FETCH:
             begin
                 r_ram_read_DV<=0;
-                //r_SM<=OPCODE_FETCH2;
                 r_SM<=OPCODE_EXECUTE;
             end
-            
-            /*OPCODE_FETCH2:
-            begin
-                r_SM<=OPCODE_EXECUTE;
-            end*/
-            
+                        
             OPCODE_EXECUTE:
             begin
                 casez(w_opcode[15:0])

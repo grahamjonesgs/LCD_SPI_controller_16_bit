@@ -115,8 +115,6 @@ proc step_failed { step } {
 OPTRACE "impl_1" END { }
 }
 
-set_msg_config -id {Synth 8-256} -limit 10000
-set_msg_config -id {Synth 8-638} -limit 10000
 set_msg_config  -string {{HW Target shutdown}}  -suppress 
 
 OPTRACE "impl_1" START { ROLLUP_1 }
@@ -126,9 +124,7 @@ set ACTIVE_STEP init_design
 set rc [catch {
   create_msg_db init_design.pb
   set_param chipscope.maxJobs 1
-  set_param tcl.collectionResultDisplayLimit 0
   set_param xicom.use_bs_reader 1
-  set_param synth.incrementalSynthesisCache ./.Xil/Vivado-35952-ubuntu/incrSyn
 OPTRACE "create in-memory project" START { }
   create_project -in_memory -part xc7a35tcpg236-1
   set_property design_mode GateLvl [current_fileset]
@@ -311,7 +307,7 @@ OPTRACE "read constraints: write_bitstream" END { }
   catch { write_mem_info -force -no_partial_mmi LCD_SPI_controller_16_bit.mmi }
 OPTRACE "write_bitstream setup" END { }
 OPTRACE "write_bitstream" START { }
-  write_bitstream -force LCD_SPI_controller_16_bit.bit 
+  write_bitstream -force LCD_SPI_controller_16_bit.bit -bin_file
 OPTRACE "write_bitstream" END { }
 OPTRACE "write_bitstream misc" START { }
 OPTRACE "read constraints: write_bitstream_post" START { }

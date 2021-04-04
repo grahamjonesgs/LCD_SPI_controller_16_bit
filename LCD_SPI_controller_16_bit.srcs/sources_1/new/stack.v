@@ -36,7 +36,7 @@ begin
         begin
             if (r_stack_pointer==0)
             begin
-                o_stack_error<=1;
+                o_stack_error=1;
             end // if(r_stack_pointer==0)
             else
             begin
@@ -47,7 +47,7 @@ begin
         begin
             if (r_stack_pointer>1022)
             begin
-                o_stack_error<=1;
+                o_stack_error=1;
             end // if (r_stack_pointer>1022)
             else
             begin

@@ -13,7 +13,7 @@
         if(r_zero_flag!=w_opcode[1])  // if zero flag  equal to request
         begin
             r_SM<=OPCODE_REQUEST;  
-            r_PC<=w_opcode[1]?r_PC-i_value : r_PC-i_value; // jump based on direction bit
+            r_PC<=w_opcode[1]?r_PC+i_value : r_PC-i_value; // jump based on direction bit
         end // if(r_register_a==8'h0)
         else
         begin
@@ -37,7 +37,7 @@ endtask
         if(r_equal_flag!=w_opcode[1])  // if zero flag  equal to request
         begin
             r_SM<=OPCODE_REQUEST;  
-            r_PC<=w_opcode[1]?r_PC-i_value : r_PC-i_value; // jump based on direction bit
+            r_PC<=w_opcode[1]?r_PC+i_value : r_PC-i_value; // jump based on direction bit
         end // if(r_register_a==8'h0)
         else
         begin
@@ -60,12 +60,12 @@ endtask
         if(r_zero_flag!=w_opcode[1])  // if zero flag  equal to request
         begin
             r_SM<=OPCODE_REQUEST;  
-            r_PC<=w_opcode[1]?r_PC-i_value : r_PC-i_value; // jump based on direction bit
+            r_PC<=i_value; // jump
         end // if(r_register_a==8'h0)
         else
         begin
             r_SM<=OPCODE_REQUEST;  
-            r_PC<=i_value;
+            r_PC<=r_PC+2;
         end // else if(r_register_a==8'h0)    
     end
 endtask 
@@ -82,22 +82,20 @@ endtask
         if(r_equal_flag!=w_opcode[1])  // if zero flag  equal to request
         begin
             r_SM<=OPCODE_REQUEST;  
-            r_PC<=w_opcode[1]?r_PC-i_value : r_PC-i_value; // jump based on direction bit
+            r_PC<=i_value; // jump
         end // if(r_register_a==8'h0)
         else
         begin
             r_SM<=OPCODE_REQUEST;  
-            r_PC<=i_value;
+            r_PC<=r_PC+2;
         end // else if(r_register_a==8'h0)    
     end
 endtask  
 
-// Jump if equal condition met
+// Jump
 // On completion
 // Increament PC  2 or jump
 // Increament r_SM
-// 020A Jump if zero
-// 020B Jump if not zero
  task t_jump;
     input [15:0] i_value; 
     begin
