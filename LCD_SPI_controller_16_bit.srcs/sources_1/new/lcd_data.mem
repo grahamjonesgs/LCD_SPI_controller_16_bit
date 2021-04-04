@@ -17,6 +17,12 @@
 // 014x inc register
 // 015x dec register
 // 04xx copy registers
+// 05xx AND registers
+// 06xx OR registers
+// 07xx XOR registers
+// 08xx AND register with value
+// 09xx OR register with value
+// 0Axx XOR register with value
 //
 // 02xx Flow control bit 0, forwards/ backwards. Bit 1 equal / not equal, bit 2-4 control type (000 zero, 001, equal)
 // 0200 Jump if zero forwards

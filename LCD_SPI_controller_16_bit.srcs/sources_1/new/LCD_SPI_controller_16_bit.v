@@ -78,7 +78,7 @@ reg  [11:0]  r_ram_next_write_addr;
 reg  [1:0]   r_load_byte_counter;
 
 // Register control
-reg  [15:0]  r_register[7:0];
+reg  [15:0]  r_register[15:0];
 reg          r_zero_flag;
 reg          r_equal_flag;
 reg  [7:0]   r_error_code;
@@ -349,6 +349,12 @@ begin
                     16'h014?: t_inc_reg;
                     16'h015?: t_dec_reg;
                     16'h04??: t_copy_reg;
+                    16'h05??: t_and_reg;
+                    16'h06??: t_or_reg;
+                    16'h07??: t_xor_reg;
+                    16'h08??: t_and_reg_value(w_var1);
+                    16'h09??: t_or_reg_value(w_var1);
+                    16'h0A??: t_xor_reg_value(w_var1);
 
                     16'b0000_0010_0000_00??:
                         t_cond_zero_rel_jump(w_var1); // 0200 - 0203
