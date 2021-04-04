@@ -22,18 +22,19 @@
    
  
 module LCD_SPI_controller_16_bit(
-           input        i_Rst_H,     // FPGA Reset
-           input        i_Clk,       // FPGA Clock
-           input        i_uart_rx,
-           output reg [15:0]  o_led,
-           output       o_SPI_LCD_Clk,
-           input        i_SPI_LCD_MISO,
-           output       o_SPI_LCD_MOSI,
-           output       o_SPI_LCD_CS_n,
-           output   reg o_LCD_DC,
-           output   reg o_LCD_reset_n,
-           output      [3:0]   o_Anode_Activate, // anode signals of the 7-segment LED display
-           output      [7:0]   o_LED_cathode// cathode patterns of the 7-segment LED display
+           input                i_Rst_H,     // FPGA Reset
+           input                i_Clk,       // FPGA Clock
+           input                i_uart_rx,
+           output reg   [15:0]  o_led,
+           output               o_SPI_LCD_Clk,
+           input                i_SPI_LCD_MISO,
+           output               o_SPI_LCD_MOSI,
+           output               o_SPI_LCD_CS_n,
+           output reg           o_LCD_DC,
+           output reg           o_LCD_reset_n,
+           output       [3:0]   o_Anode_Activate, // anode signals of the 7-segment LED display
+           output       [7:0]   o_LED_cathode, // cathode patterns of the 7-segment LED display
+           input        [15:0]  i_switch
        );
  
 parameter STACK_SIZE=1024;
@@ -336,11 +337,12 @@ begin
                         t_led_state(w_var1[0]);
                     16'h2005:
                         t_lcd_reset(w_var1[0]);
-
+                        
                     16'h201?: spi_dc_write_command_reg;
                     16'h202?: spi_dc_data_command_reg;
                     16'h203?: t_delay_reg;
                     16'h204?: t_led_reg;
+                    16'h205?: t_get_switch_reg;
 
                     16'h010?: t_set_reg(w_var1);
                     16'h011?: t_inc_value_reg(w_var1);
