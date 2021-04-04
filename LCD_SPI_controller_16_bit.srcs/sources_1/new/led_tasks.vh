@@ -11,3 +11,17 @@ input i_state;
         r_PC<=r_PC+2;    
     end
 endtask 
+
+ // Set LED signal status from register
+ // On completion
+ // Increament PC 1
+ // Increamaent r_SM_msg
+task t_led_reg;
+    reg [3:0] reg_1;
+    begin
+        reg_1=w_opcode[3:0];
+        o_led<=r_register[reg_1];
+        r_SM<=OPCODE_REQUEST;  
+        r_PC<=r_PC+1;    
+    end
+endtask 

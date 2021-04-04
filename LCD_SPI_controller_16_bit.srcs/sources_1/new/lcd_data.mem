@@ -52,6 +52,7 @@
 // 16'h201x - SPI LCD write command from lower byte register 
 // 16'h202x - SPI LCD write data type from lower byteregister
 // 16'h203x - delay data 1.35/2^16 of a second (BASYS 3) from register
+// 16'h204x - Set LED array to register
 //
 // Stack
 // 16'h0300 - Push value onto stack

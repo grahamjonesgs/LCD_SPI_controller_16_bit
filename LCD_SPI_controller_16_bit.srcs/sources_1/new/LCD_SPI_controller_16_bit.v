@@ -25,8 +25,7 @@ module LCD_SPI_controller_16_bit(
            input        i_Rst_H,     // FPGA Reset
            input        i_Clk,       // FPGA Clock
            input        i_uart_rx,
-           output reg   o_led,
-           output reg   o_led_2,
+           output reg [15:0]  o_led,
            output       o_SPI_LCD_Clk,
            input        i_SPI_LCD_MISO,
            output       o_SPI_LCD_MOSI,
@@ -196,7 +195,7 @@ begin
     r_error_code=8'h0;
     r_timeout_counter=32'b0;
     r_seven_seg_value=32'h20_10_00_01;
-    o_led_2=1'b0;
+    o_led=16'h0;
     rx_count=8'b0;
     o_ram_write_addr=12'h0;
     r_ram_next_write_addr=12'h0;
@@ -341,6 +340,7 @@ begin
                     16'h201?: spi_dc_write_command_reg;
                     16'h202?: spi_dc_data_command_reg;
                     16'h203?: t_delay_reg;
+                    16'h204?: t_led_reg;
 
                     16'h010?: t_set_reg(w_var1);
                     16'h011?: t_inc_value_reg(w_var1);
