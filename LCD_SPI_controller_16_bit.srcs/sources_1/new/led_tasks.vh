@@ -1,10 +1,10 @@
  // Set LED signal status
  // On completion
- // Increament PC 2
+ // Increment PC 2
  // Increamaent r_SM_msg
    
 task t_led_state;
-input i_state; 
+input [15:0] i_state; 
     begin
         o_led<=i_state;
         r_SM<=OPCODE_REQUEST;  
@@ -14,7 +14,7 @@ endtask
 
  // Set LED signal status from register
  // On completion
- // Increament PC 1
+ // Increment PC 1
  // Increamaent r_SM_msg
 task t_led_reg;
     reg [3:0] reg_1;
@@ -28,7 +28,7 @@ endtask
 
  // Put switch status into register
  // On completion
- // Increament PC 1
+ // Increment PC 1
  // Increamaent r_SM_msg
 task t_get_switch_reg;
  reg [3:0] reg_1;

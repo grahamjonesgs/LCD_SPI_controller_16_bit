@@ -3,17 +3,15 @@
 // 03xx  Stack
 // 04xx  Register copy xx means from -> to
 // 02xx  Flow control
-// 20xx SPI LCD control
-// 21xx Set 7Seg display
-//
-//
+// 20xx  SPI LCD control
+// 21xx  Set 7Seg display
 //
 // FFxx Exception and restart
 //
 // 010x set register
 // 011x inc register by amount
 // 012x dec register by amount
-// 013x dec register compare to value
+// 013x register compare to value
 // 014x inc register
 // 015x dec register
 // 04xx copy registers
@@ -23,6 +21,7 @@
 // 08xx AND register with value
 // 09xx OR register with value
 // 0Axx XOR register with value
+// 0Bxx compare two registers
 //
 // 02xx Flow control bit 0, forwards/ backwards. Bit 1 equal / not equal, bit 2-4 control type (000 zero, 001, equal)
 // 0200 Jump if zero forwards
@@ -37,8 +36,9 @@
 // 0209 Jump if not zero
 // 020A Jump if equal
 // 020B Jump if not equal
-// 020C Call
-// 020D Ret
+// 020C Call - push PC into stack
+// 020D Return to PC on top of stack
+// 020E No operation
 //
 // 0210 Jump
 // 

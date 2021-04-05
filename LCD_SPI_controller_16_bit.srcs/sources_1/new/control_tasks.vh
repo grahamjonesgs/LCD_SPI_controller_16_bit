@@ -1,8 +1,8 @@
 
 // Jump if zero condition met jump relative as per opcode direction
 // On completion
-// Increament PC  2 or jump twice amount
-// Increament r_SM
+// Increment PC  2 or jump twice amount
+// Increment r_SM
 // 0200 Jump if zero forwards
 // 0201 Jump if zero backwards
 // 0202 Jump if not zero forwards
@@ -25,8 +25,8 @@ endtask
 
 // Jump if equal condition met jump relative as per opcode direction
 // On completion
-// Increament PC  2 or jump twice amount
-// Increament r_SM
+// Increment PC  2 or jump amount
+// Increment r_SM
 // 0204 Jump if equal forwards
 // 0205 Jump if equal backwards
 // 0206 Jump if not equal forwards
@@ -50,8 +50,8 @@ endtask
  
 // Jump if zero condition met
 // On completion
-// Increament PC  2 or jump
-// Increament r_SM
+// Increment PC  2 or jump
+// Increment r_SM
 // 0208 Jump if zero
 // 0209 Jump if not zero
  task t_cond_zero_jump;
@@ -72,8 +72,8 @@ endtask
 
 // Jump if equal condition met
 // On completion
-// Increament PC  2 or jump
-// Increament r_SM
+// Increment PC  2 or jump
+// Increment r_SM
 // 020A Jump if zero
 // 020B Jump if not zero
  task t_cond_equal_jump;
@@ -94,8 +94,8 @@ endtask
 
 // Jump
 // On completion
-// Increament PC  2 or jump
-// Increament r_SM
+// PC  set to value
+// Increment r_SM
  task t_jump;
     input [15:0] i_value; 
     begin
@@ -103,8 +103,12 @@ endtask
        r_PC<=i_value;    
     end
 endtask       
- 
- task t_call;
+
+// Call - push PC on stack 
+// On completion
+// PC  set to value
+// Increment r_SM 
+task t_call;
     input [15:0] i_value; 
     begin
        r_stack_write_value=r_PC;   // push PC on stack
@@ -114,10 +118,26 @@ endtask
     end
 endtask  
 
- task t_ret; 
+
+// Return from call, pop new pc from stack 
+// On completion
+// PC  set to top of stack +2
+// Increment r_SM 
+task t_ret; 
     begin
        r_stack_read_flag<=1'b1;  // to move stack pointer
        r_SM<=OPCODE_REQUEST;     // Pop PC from stack plus 2 to jump over call
        r_PC<=i_stack_top_value+2;    
     end
-endtask  
+endtask 
+
+// Do nothng 
+// On completion
+// Increment PC
+// Increment r_SM 
+task t_nop; 
+    begin
+       r_SM<=OPCODE_REQUEST;     // Pop PC from stack plus 2 to jump over call
+       r_PC<=+1;    
+    end
+endtask   

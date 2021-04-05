@@ -1,21 +1,7 @@
- // Set reg 
- // On completion
- // Increament PC 2
- // Increamaent r_SM_msg
- 
-// 8'h10 - set reg  value
-// 8'h11 - inc reg  value 
-// 8'h12 - dec reg  value
-// 8'h13 - jump if  zero forwards
-// 8'h14 - jump if  zero backwards
-// 8'h15 - jump if  not zero forwards
-// 8'h16 - jump if  not zero backwards
-
-
- // Copy from first reg to second
- // On completion
- // Increament PC
- // Increament r_SM_msg
+// Copy from second reg to first
+// On completion
+// Increament PC
+// Increament r_SM_msg
 task t_copy_reg;
     reg [3:0] reg_1;
     reg [3:0] reg_2;
@@ -28,6 +14,10 @@ task t_copy_reg;
     end
 endtask 
 
+// AND first reg with second, result in first
+// On completion
+// Increament PC
+// Increament r_SM_msg
 task t_and_reg;
     reg [3:0] reg_1;
     reg [3:0] reg_2;
@@ -40,6 +30,10 @@ task t_and_reg;
     end
 endtask 
 
+// OR first reg with second, result in first
+// On completion
+// Increament PC
+// Increament r_SM_msg
 task t_or_reg;
     reg [3:0] reg_1;
     reg [3:0] reg_2;
@@ -52,6 +46,10 @@ task t_or_reg;
     end
 endtask 
 
+// XOR first reg with second, result in first
+// On completion
+// Increament PC
+// Increament r_SM_msg
 task t_xor_reg;
     reg [3:0] reg_1;
     reg [3:0] reg_2;
@@ -64,6 +62,10 @@ task t_xor_reg;
     end
 endtask 
 
+// AND first reg with value, result in first
+// On completion
+// Increament PC by 2
+// Increament r_SM_msg
 task t_and_reg_value;
     input [15:0] i_value;
     reg [3:0] reg_1;
@@ -75,6 +77,10 @@ task t_and_reg_value;
     end
 endtask 
 
+// OR first reg with value, result in first
+// On completion
+// Increament PC by 2
+// Increament r_SM_msg
 task t_or_reg_value;
     input [15:0] i_value;
     reg [3:0] reg_1;
@@ -86,6 +92,10 @@ task t_or_reg_value;
     end
 endtask 
 
+// XOR first reg with value, result in first
+// On completion
+// Increament PC by 2
+// Increament r_SM_msg
 task t_xor_reg_value;
     input [15:0] i_value;
     reg [3:0] reg_1;
@@ -98,9 +108,9 @@ task t_xor_reg_value;
 endtask 
 
 // Set reg with value
- // On completion
- // Increament PC 2
- // Increament r_SM_msg
+// On completion
+// Increament PC 2
+// Increament r_SM_msg
 task t_set_reg;
     input [15:0] i_value; 
     reg [3:0] reg_1;
@@ -129,9 +139,9 @@ endtask
 endtask 
 
 // Dec reg by value
- // On completion
- // Increament PC 2
- // Increament r_SM_msg
+// On completion
+// Increament PC 2
+// Increament r_SM_msg
  task t_dec_value_reg;
     input [15:0] i_value; 
     reg [3:0] reg_1; 
@@ -145,10 +155,10 @@ endtask
 endtask 
   
 // Dec reg
- // On completion
- // Increament PC
- // Increament r_SM_msg
- task t_dec_reg;  
+// On completion
+// Increament PC
+// Increament r_SM_msg
+task t_dec_reg;  
     reg [3:0] reg_1; 
     begin
         reg_1=w_opcode[3:0];
@@ -160,10 +170,10 @@ endtask
 endtask 
 
 // Inc reg
- // On completion
- // Increament PC
- // Increament r_SM_msg
- task t_inc_reg;  
+// On completion
+// Increament PC
+// Increment r_SM_msg
+task t_inc_reg;  
     reg [3:0] reg_1; 
     begin
         reg_1=w_opcode[3:0];
@@ -174,16 +184,33 @@ endtask
     end
 endtask 
 
-// Compare register
+// Compare register to value
 // On completion
-// Increament PC 2
-// Increament r_SM_msg
- task t_compare_reg;
+// Increment PC 2
+// Increment r_SM_msg
+ task t_compare_reg_value;
     input [15:0] i_value;  
     reg [3:0] reg_1; 
     begin
         reg_1=w_opcode[3:0];
         r_equal_flag <= r_register[reg_1]==i_value ? 1'b1 : 1'b0;
+        r_SM<=OPCODE_REQUEST;  
+        r_PC<=r_PC+2; 
+    end
+endtask 
+
+
+// Compare registers
+// On completion
+// Increment PC 2
+// Increment r_SM_msg
+ task t_compare_regs;  
+    reg [3:0] reg_1; 
+    reg [3:0] reg_2;
+    begin
+        reg_2=w_opcode[3:0];
+        reg_1=w_opcode[11:8];
+        r_equal_flag <= r_register[reg_1]==r_register[reg_2] ? 1'b1 : 1'b0;
         r_SM<=OPCODE_REQUEST;  
         r_PC<=r_PC+2; 
     end

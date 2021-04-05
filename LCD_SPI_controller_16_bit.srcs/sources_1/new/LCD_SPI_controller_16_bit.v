@@ -326,17 +326,11 @@ begin
             OPCODE_EXECUTE:
             begin
                 casez(w_opcode[15:0])
-
-                    16'h2001:
-                        spi_dc_write_command(w_var1);
-                    16'h2002:
-                        spi_dc_write_data(w_var1);
-                    16'h2003:
-                        t_delay(w_var1);
-                    16'h2004:
-                        t_led_state(w_var1[0]);
-                    16'h2005:
-                        t_lcd_reset(w_var1[0]);
+                    16'h2001: spi_dc_write_command(w_var1);
+                    16'h2002: spi_dc_write_data(w_var1);
+                    16'h2003: t_delay(w_var1);
+                    16'h2004: t_led_state(w_var1);
+                    16'h2005: t_lcd_reset(w_var1);
                         
                     16'h201?: spi_dc_write_command_reg;
                     16'h202?: spi_dc_data_command_reg;
@@ -347,45 +341,35 @@ begin
                     16'h010?: t_set_reg(w_var1);
                     16'h011?: t_inc_value_reg(w_var1);
                     16'h012?: t_dec_value_reg(w_var1);
-                    16'h013?: t_compare_reg(w_var1);
+                    16'h013?: t_compare_reg_value(w_var1);
                     16'h014?: t_inc_reg;
                     16'h015?: t_dec_reg;
                     16'h04??: t_copy_reg;
                     16'h05??: t_and_reg;
                     16'h06??: t_or_reg;
                     16'h07??: t_xor_reg;
-                    16'h08??: t_and_reg_value(w_var1);
-                    16'h09??: t_or_reg_value(w_var1);
-                    16'h0A??: t_xor_reg_value(w_var1);
+                    16'h080?: t_and_reg_value(w_var1);
+                    16'h081?: t_or_reg_value(w_var1);
+                    16'h082?: t_xor_reg_value(w_var1);
+                    16'h09??: t_compare_regs;
 
-                    16'b0000_0010_0000_00??:
-                        t_cond_zero_rel_jump(w_var1); // 0200 - 0203
-                    16'b0000_0010_0000_01??:
-                        t_cond_equal_rel_jump(w_var1); // 0204 - 0207
-
-                    16'b0000_0010_0000_100?:
-                        t_cond_zero_jump(w_var1); // 0208 - 0209
-                    16'b0000_0010_0000_101?:
-                        t_cond_equal_jump(w_var1); // 020A - 020B        
+                    16'b0000_0010_0000_00??: t_cond_zero_rel_jump(w_var1); // 0200 - 0203
+                    16'b0000_0010_0000_01??: t_cond_equal_rel_jump(w_var1); // 0204 - 0207
+                    16'b0000_0010_0000_100?: t_cond_zero_jump(w_var1); // 0208 - 0209
+                    16'b0000_0010_0000_101?: t_cond_equal_jump(w_var1); // 020A - 020B        
                     16'h020C: t_call(w_var1); 
-                    16'h020D: t_ret; 
-                        
-                        
-                    16'h0210:
-                        t_jump(w_var1);
+                    16'h020D: t_ret;  
+                    16'h020E: t_nop;        
+                    16'h0210: t_jump(w_var1);
 
-                    16'h0300:
-                        t_stack_push_value(w_var1);
+                    16'h0300: t_stack_push_value(w_var1);
                     16'h031?: t_stack_push_reg;
                     16'h032?: t_stack_pop_reg;
                     16'h033?: t_stack_peek_reg;
                     
-                    16'h2100:
-                        t_7_seg_value(w_var1);
-                    16'h211?:
-                        t_7_seg_reg(w_var1);
-
-                    16'hFFFF:
+                    16'h2100: t_7_seg_value(w_var1);
+                    16'h211?: t_7_seg_reg(w_var1);
+                    16'hFFFF: // Reset
                     begin
                         r_SM<=OPCODE_REQUEST;
                         r_PC<=12'h0;

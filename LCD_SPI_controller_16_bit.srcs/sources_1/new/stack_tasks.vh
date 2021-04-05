@@ -1,7 +1,7 @@
 // Push value onto stack
- // On completion
- // Increament PC 2
- // Increament r_SM_msg
+// On completion
+// Increment PC by 2
+// Increment r_SM_msg
 task t_stack_push_value;
     input [15:0] i_value;
     begin
@@ -13,9 +13,9 @@ task t_stack_push_value;
 endtask 
 
 // Push register onto stack
- // On completion
- // Increament PC
- // Increament r_SM_msg
+// On completion
+// increment PC
+// increment r_SM_msg
 task t_stack_push_reg;
     reg [3:0] reg_1;
     begin
@@ -28,9 +28,9 @@ task t_stack_push_reg;
 endtask
 
 // Pop register from stack
- // On completion
- // Increament PC 
- // Increament r_SM_msg
+// On completion
+// increment PC 
+// increment r_SM_msg
 task t_stack_pop_reg;
     reg [3:0] reg_1;
     begin
@@ -43,9 +43,9 @@ task t_stack_pop_reg;
 endtask  
 
 // Peek register from stack
- // On completion
- // Increament PC 2
- // Increament r_SM
+// On completion
+// increment PC
+// increment r_SM
 task t_stack_peek_reg;
     reg [3:0] reg_1;
     begin
@@ -58,7 +58,7 @@ task t_stack_peek_reg;
         begin    
             r_register[reg_1] <= i_stack_peek_value;
             r_SM<=OPCODE_REQUEST;  
-            r_PC<=r_PC+2; 
+            r_PC<=r_PC; 
             r_extra_cycle<=0; 
         end // else if (r_extra_cycle==0)
      end
