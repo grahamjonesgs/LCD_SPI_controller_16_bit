@@ -352,11 +352,15 @@ begin
                     16'h081?: t_or_reg_value(w_var1);
                     16'h082?: t_xor_reg_value(w_var1);
                     16'h09??: t_compare_regs;
-
-                    16'b0000_0010_0000_00??: t_cond_zero_rel_jump(w_var1); // 0200 - 0203
-                    16'b0000_0010_0000_01??: t_cond_equal_rel_jump(w_var1); // 0204 - 0207
-                    16'b0000_0010_0000_100?: t_cond_zero_jump(w_var1); // 0208 - 0209
-                    16'b0000_0010_0000_101?: t_cond_equal_jump(w_var1); // 020A - 020B        
+                    
+                    16'h0208:  t_cond_zero_jump(w_var1); // 0208
+                    16'h0209:  t_cond_zero_jump(w_var1); // 0208
+                    16'h020A:  t_cond_equal_jump(w_var1); // 020A 
+                    16'h020B:  t_cond_equal_jump(w_var1); // 020A 
+                    
+                    
+                    
+                        
                     16'h020C: t_call(w_var1); 
                     16'h020D: t_ret;  
                     16'h020E: t_nop;        
