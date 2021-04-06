@@ -81,6 +81,8 @@ reg  [1:0]   r_load_byte_counter;
 reg  [15:0]  r_register[15:0];
 reg          r_zero_flag;
 reg          r_equal_flag;
+reg          r_carry_flag;
+reg          r_overflow_flag;
 reg  [7:0]   r_error_code;
 
 // Display value
@@ -194,6 +196,9 @@ begin
     o_LCD_reset_n=1'b0;
     r_PC=12'h0;
     r_zero_flag=0;
+    r_equal_flag=0;
+    r_carry_flag=0;
+    r_overflow_flag=0;
     r_error_code=8'h0;
     r_timeout_counter=32'b0;
     r_seven_seg_value=32'h20_10_00_01;
@@ -216,6 +221,9 @@ begin
         o_LCD_reset_n<=1'b0;
         r_PC<=12'h0;
         r_zero_flag<=0;
+        r_equal_flag<=0;
+        r_carry_flag<=0;
+        r_overflow_flag<=0;
         r_error_code<=8'h0;
         rx_count<=8'b0;
         o_ram_write_addr<=12'h0;
