@@ -13,7 +13,7 @@ casez(w_opcode[15:0])
 // Board LED and Switch 3xxx
                     16'h300?: t_led_reg;                      // LEDR set with register
                     16'h301?: t_get_switch_reg;               // SWR Get switch status into register
-                    16'h302?: t_7_seg_reg(w_var1);            // 7SEGR Set 7 Seg to register
+                    16'h302?: t_7_seg_reg;                    // 7SEGR Set 7 Seg to register
                     16'h3030: t_led_state(w_var1);            // LEDV Set LED value
                     16'h3031: t_7_seg_value(w_var1);          // 7SEGV Set 7 Seg to Value
                     

@@ -18,7 +18,6 @@ endtask
  // Increamaent r_SM_msg
    
 task t_7_seg_reg;
-input [15:0] i_byte; 
     reg [3:0] reg_1;
     begin
         reg_1=w_opcode[3:0];
