@@ -183,6 +183,7 @@ rams_sp_nc rams_sp_nc1 (
     `include "stack_tasks.vh"
     `include "functions.vh"
     `include "7_seg.vh"
+    `include "opcode_select.vh"
 
 initial
 begin
@@ -325,7 +326,8 @@ begin
                         
             OPCODE_EXECUTE:
             begin
-                casez(w_opcode[15:0])
+            t_opcode_select;
+                /*casez(w_opcode[15:0])
                     16'h2001: spi_dc_write_command(w_var1);
                     16'h2002: spi_dc_write_data(w_var1);
                     16'h2003: t_delay(w_var1);
@@ -383,7 +385,7 @@ begin
                         r_SM<=HCF_1; // Halt and catch fire error 1
                         r_error_code<=ERR_INV_OPCODE;
                     end // default case
-                endcase //casez(w_opcode[15:0])
+                endcase //casez(w_opcode[15:0]) */
             end // case OPCODE_EXECUTE
             HCF_1:
             begin
