@@ -18,29 +18,46 @@ casez(w_opcode[15:0])
                     16'h3031: t_7_seg_value(w_var1);          // 7SEGV Set 7 Seg to Value
                     
 // Register control 0xxx
-                    16'h01??: t_copy_reg;                     // COPY Copy register
-                    16'h02??: t_and_reg;                      // AND AND register
-                    16'h03??: t_or_reg;                       // OR OR register
-                    16'h04??: t_xor_reg;                      // XOR XOR register
+                    16'h01??: t_copy_regs;                    // COPY Copy register
+                    16'h02??: t_and_regs;                     // AND AND register
+                    16'h03??: t_or_regs;                      // OR OR register
+                    16'h04??: t_xor_regs;                     // XOR XOR register
                     16'h05??: t_compare_regs;                 // CMPRR Compare registers
-                    16'h060?: t_set_reg(w_var1);              // SETR Set register value
-                    16'h061?: t_inc_value_reg(w_var1);        // INCRV Increament register by value
-                    16'h062?: t_dec_value_reg(w_var1);        // DECRV Decreament register by value
-                    16'h063?: t_compare_reg_value(w_var1);    // CMPRV Compare register to value
-                    16'h064?: t_inc_reg;                      // INCR Increament register
-                    16'h065?: t_dec_reg;                      // DECR Decreament register
-                    16'h066?: t_and_reg_value(w_var1);        // ANDV AND register
-                    16'h067?: t_or_reg_value(w_var1);         // ORV OR register
-                    16'h068?: t_xor_reg_value(w_var1);        // XORV XORV register
-                    
+                    16'h06??: t_add_regs;                     // ADDRR Compare registers
+                    16'h07??: t_minus_regs;                   // MINUSRR Compare registers                  
+                    16'h080?: t_set_reg(w_var1);              // SETR Set register value
+                    16'h081?: t_add_value(w_var1);            // ADDV Increament register by value
+                    16'h082?: t_minus_value(w_var1);          // MINUSV Decreament register by value
+                    16'h083?: t_compare_reg_value(w_var1);    // CMPRV Compare register to value
+                    16'h084?: t_inc_reg;                      // INCR Increament register
+                    16'h085?: t_dec_reg;                      // DECR Decreament register
+                    16'h086?: t_and_reg_value(w_var1);        // ANDV AND register
+                    16'h087?: t_or_reg_value(w_var1);         // ORV OR register with value
+                    16'h088?: t_xor_reg_value(w_var1);        // XORV XOR register with value
+                    16'h089?: t_set_reg_flags;                // SETFR Set register to flags value
+                    16'h08A?: t_negate_reg;                   // NEGR Set register 2's comp
+                                      
 // Flow control 1xxx        
-                    16'h1000: t_cond_zero_jump(w_var1);       // JMPZ Jump if zero 
-                    16'h1001: t_cond_not_zero_jump(w_var1);   // JMPNZ Jump if not zero 
-                    16'h1002: t_cond_equal_jump(w_var1);      // JMPE Jump if equal 
-                    16'h1003: t_cond_not_equal_jump(w_var1);  // JMPNE Jump not if equal                         
-                    16'h1004: t_call(w_var1);                 // CALL Call function
-                    16'h1005: t_ret;                          // RET Return from function               
-                    16'h1006: t_jump(w_var1);                 // JMP Jump
+                    16'h1000: t_jump(w_var1);                    // JMP Jump
+                    16'h1001: t_cond_zero_jump(w_var1);          // JMPZ Jump if zero 
+                    16'h1002: t_cond_not_zero_jump(w_var1);      // JMPNZ Jump if not zero 
+                    16'h1003: t_cond_equal_jump(w_var1);         // JMPE Jump if equal 
+                    16'h1004: t_cond_not_equal_jump(w_var1);     // JMPNE Jump if not equal    
+                    16'h1005: t_cond_carry_jump(w_var1);         // JMPC Jump if carry 
+                    16'h1006: t_cond_not_carry_jump(w_var1);     // JMPNC Jump if not carry  
+                    16'h1007: t_cond_overflow_jump(w_var1);      // JMPO Jump if overflow 
+                    16'h1008: t_cond_not_overflow_jump(w_var1);  // JMPNO Jump if not overflow                                      
+                    16'h1009: t_call(w_var1);                    // CALL Call function
+                    16'h100A: t_cond_zero_call(w_var1);          // CALLZ Call if zero 
+                    16'h100B: t_cond_not_zero_call(w_var1);      // CALLNZ Call if not zero 
+                    16'h100C: t_cond_equal_call(w_var1);         // CALLE Call if equal 
+                    16'h100D: t_cond_not_equal_call(w_var1);     // CALLNE Call if not equal    
+                    16'h100E: t_cond_carry_call(w_var1);         // CALLC Call if carry 
+                    16'h100F: t_cond_not_carry_call(w_var1);     // CALLNC Call if not carry  
+                    16'h1010: t_cond_overflow_call(w_var1);      // CALLO Call if overflow 
+                    16'h1011: t_cond_not_overflow_call(w_var1);  // CALLNO Call if not overflow             
+                    16'h1012: t_ret;                             // RET Return from function               
+                    
 // Stack control 4xxx                
                     16'h400?: t_stack_push_reg;               // PUSH Push register onto stack
                     16'h401?: t_stack_pop_reg;                // POP Pop stack into register
@@ -48,7 +65,7 @@ casez(w_opcode[15:0])
                     16'h4030: t_stack_push_value(w_var1);     // PUSHV Push value onto stack            
 // Other Fxxx
                     16'hF001: t_nop;                          // NOP No opperation
-                    16'hF002:                                 // RESET Reset
+                    16'hF002: //                              // RESET Reset
                     begin
                         r_SM<=OPCODE_REQUEST;
                         r_PC<=12'h0;

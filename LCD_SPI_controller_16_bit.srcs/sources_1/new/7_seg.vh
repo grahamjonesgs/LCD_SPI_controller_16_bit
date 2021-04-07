@@ -21,8 +21,7 @@ task t_7_seg_reg;
     reg [3:0] reg_1;
     begin
         reg_1=w_opcode[3:0];
-        r_seven_seg_value<={4'h0,r_register[reg_1][15:12],4'h0,r_register[reg_1][11:8],4'h0,r_register[reg_1][7:4],4'h0,r_register[reg_1][3:0]};
-               
+        r_seven_seg_value<={4'h0,r_register[reg_1][15:12],4'h0,r_register[reg_1][11:8],4'h0,r_register[reg_1][7:4],4'h0,r_register[reg_1][3:0]};     
         r_SM<=OPCODE_REQUEST;  
         r_PC<=r_PC+1;    
     end
