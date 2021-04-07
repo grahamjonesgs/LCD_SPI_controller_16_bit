@@ -9,7 +9,7 @@ task t_copy_regs;
     reg [3:0] reg_2;
     begin
         reg_2=w_opcode[3:0];
-        reg_1=w_opcode[11:8];
+        reg_1=w_opcode[7:4];
         r_register[reg_1]<=r_register[reg_2];
         r_SM<=OPCODE_REQUEST;  
         r_PC<=r_PC+1;    
@@ -56,7 +56,7 @@ task t_and_regs;
     reg [3:0] reg_2;
     begin
         reg_2=w_opcode[3:0];
-        reg_1=w_opcode[11:8];
+        reg_1=w_opcode[7:4];
         r_register[reg_1]<=r_register[reg_1]&r_register[reg_2];
         r_SM<=OPCODE_REQUEST;  
         r_PC<=r_PC+1;    
@@ -72,7 +72,7 @@ task t_or_regs;
     reg [3:0] reg_2;
     begin
         reg_2=w_opcode[3:0];
-        reg_1=w_opcode[11:8];
+        reg_1=w_opcode[7:4];
         r_register[reg_1]<=r_register[reg_1]|r_register[reg_2];
         r_SM<=OPCODE_REQUEST;  
         r_PC<=r_PC+1;    
@@ -88,7 +88,7 @@ task t_xor_regs;
     reg [3:0] reg_2;
     begin
         reg_2=w_opcode[3:0];
-        reg_1=w_opcode[11:8];
+        reg_1=w_opcode[7:4];
         r_register[reg_1]<=r_register[reg_1]^r_register[reg_2];
         r_SM<=OPCODE_REQUEST;  
         r_PC<=r_PC+1;    
@@ -225,31 +225,32 @@ endtask
 
 // Add second reg to first, result in first
 // On completion
-// Increament PC
-// Increament r_SM_msg
+// Increment PC
+// Increment r_SM_msg
 task t_add_regs;
     reg [3:0] reg_1;
     reg [3:0] reg_2;
     begin
         reg_2=w_opcode[3:0];
-        reg_1=w_opcode[11:8];    
+        reg_1=w_opcode[7:4];    
         r_zero_flag <= r_register[reg_1]+r_register[reg_2]==0 ? 1'b1 : 1'b0;
         {r_carry_flag,r_register[reg_1]} <= {1'b0,r_register[reg_1]}+{1'b0,r_register[reg_2]};
         r_SM<=OPCODE_REQUEST;  
-        r_PC<=r_PC+1;    
+        r_PC<=r_PC+1;  
+          
     end
 endtask 
 
 // Minus second reg from first, result in first
 // On completion
-// Increament PC
-// Increament r_SM_msg
+// Increment PC
+// Increment r_SM_msg
 task t_minus_regs;
     reg [3:0] reg_1;
     reg [3:0] reg_2;
     begin
         reg_2=w_opcode[3:0];
-        reg_1=w_opcode[11:8];    
+        reg_1=w_opcode[7:4];    
         r_zero_flag <= r_register[reg_1]-r_register[reg_2]==0 ? 1'b1 : 1'b0;
         {r_carry_flag,r_register[reg_1]} <= {1'b0,r_register[reg_1]}-{1'b0,r_register[reg_2]};
         r_SM<=OPCODE_REQUEST;  
@@ -280,7 +281,7 @@ endtask
     reg [3:0] reg_2;
     begin
         reg_2=w_opcode[3:0];
-        reg_1=w_opcode[11:8];
+        reg_1=w_opcode[7:4];
         r_equal_flag <= r_register[reg_1]==r_register[reg_2] ? 1'b1 : 1'b0;
         r_SM<=OPCODE_REQUEST;  
         r_PC<=r_PC+2; 
