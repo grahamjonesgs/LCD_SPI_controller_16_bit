@@ -3,7 +3,7 @@
  // Increment PC 2
  // Increamaent r_SM_msg
    
-task t_led_state;
+task t_led_value;
 input [15:0] i_state; 
     begin
         o_led<=i_state;

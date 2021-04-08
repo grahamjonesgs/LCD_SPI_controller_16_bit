@@ -2,7 +2,7 @@
  // On completion
  // Increment PC by 2
  // Increamaent r_SM
- task spi_dc_write_command;
+ task spi_dc_write_command_value;
     input [15:0] i_byte; 
     begin
     if (i_TX_LCD_Ready)
@@ -25,7 +25,7 @@ endtask
  // On completion
  // Increment PC by 2
  // Increamaent r_SM   
-task spi_dc_write_data;
+task spi_dc_write_data_value;
     input [15:0] i_byte; 
     begin
     if (i_TX_LCD_Ready)
@@ -97,7 +97,7 @@ endtask
 // On completion
 // Increment PC by 2
 // Increment r_SM   
-task t_lcd_reset;
+task t_lcd_reset_value;
     input [15:0] i_state; 
     begin
         o_LCD_reset_n<=i_state[0];

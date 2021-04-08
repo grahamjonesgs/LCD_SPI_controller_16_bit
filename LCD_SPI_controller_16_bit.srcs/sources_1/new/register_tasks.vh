@@ -152,13 +152,16 @@ endtask
  task t_add_value;
     input [15:0] i_value; 
     reg [3:0] reg_1; 
-    reg [15:0] dummy;
+    reg [15:0] hold;
     begin
         reg_1=w_opcode[3:0];
         r_zero_flag <= r_register[reg_1]+i_value==0 ? 1'b1 : 1'b0;
-        {r_carry_flag,r_register[reg_1]} <= {1'b0,r_register[reg_1]}+{1'b0,i_value};
+        {r_carry_flag,hold} = {1'b0,r_register[reg_1]}+{1'b0,i_value};
+        r_overflow_flag = (r_register[reg_1][15]&&i_value[15]&&!hold[15])||(!r_register[reg_1][15]&&!i_value[15]&&hold[15]) ? 1'b1 : 1'b0;
+        r_register[reg_1]<= hold;      
         r_SM<=OPCODE_REQUEST;  
-        r_PC<=r_PC+2; 
+        r_PC<=r_PC+2;         
+        
     end
 endtask 
 
@@ -169,12 +172,15 @@ endtask
  task t_minus_value;
     input [15:0] i_value; 
     reg [3:0] reg_1; 
+    reg [15:0] hold;
     begin
         reg_1=w_opcode[3:0];
         r_zero_flag <= r_register[reg_1]-i_value==0 ? 1'b1 : 1'b0;
-        {r_carry_flag,r_register[reg_1]} <= {1'b0,r_register[reg_1]}-{1'b0,i_value};
+        {r_carry_flag,hold} = {1'b0,r_register[reg_1]}-{1'b0,i_value};
+        r_overflow_flag = (r_register[reg_1][15]&&!i_value[15]&&!hold[15])||(!r_register[reg_1][15]&&i_value[15]&&hold[15]) ? 1'b1 : 1'b0;
+        r_register[reg_1]<= hold;      
         r_SM<=OPCODE_REQUEST;  
-        r_PC<=r_PC+2; 
+        r_PC<=r_PC+2;   
     end
 endtask 
   
@@ -184,10 +190,13 @@ endtask
 // Increament r_SM_msg
 task t_dec_reg;  
     reg [3:0] reg_1; 
+    reg [15:0] hold;
     begin
         reg_1=w_opcode[3:0];
         r_zero_flag <= r_register[reg_1]-1==0 ? 1'b1 : 1'b0;
-        {r_carry_flag,r_register[reg_1]} <= {1'b0,r_register[reg_1]}-{17'b1};
+        {r_carry_flag,hold} <= {1'b0,r_register[reg_1]}-{17'b1};
+        r_overflow_flag = (r_register[reg_1][15]&&!hold[15]) ? 1'b1 : 1'b0;
+        r_register[reg_1]<= hold;
         r_SM<=OPCODE_REQUEST;  
         r_PC<=r_PC+1; 
     end
@@ -199,12 +208,15 @@ endtask
 // Increment r_SM_msg
 task t_inc_reg;  
     reg [3:0] reg_1; 
+    reg [15:0] hold;
     begin
         reg_1=w_opcode[3:0];
-        r_zero_flag <= r_register[reg_1]+1==0 ? 1'b1 : 1'b0;
-        {r_carry_flag,r_register[reg_1]} <= {1'b0,r_register[reg_1]}+{17'b1};
+        r_zero_flag <= r_register[reg_1]-1==0 ? 1'b1 : 1'b0;
+        {r_carry_flag,hold} <= {1'b0,r_register[reg_1]}-{17'b1};
+        r_overflow_flag = (!r_register[reg_1][15]&&hold[15]) ? 1'b1 : 1'b0;
+        r_register[reg_1]<= hold;
         r_SM<=OPCODE_REQUEST;  
-        r_PC<=r_PC+1; 
+        r_PC<=r_PC+1;
     end
 endtask 
 
@@ -230,11 +242,15 @@ endtask
 task t_add_regs;
     reg [3:0] reg_1;
     reg [3:0] reg_2;
+    reg [15:0] hold;
     begin
         reg_2=w_opcode[3:0];
-        reg_1=w_opcode[7:4];    
+        reg_1=w_opcode[7:4];  
         r_zero_flag <= r_register[reg_1]+r_register[reg_2]==0 ? 1'b1 : 1'b0;
-        {r_carry_flag,r_register[reg_1]} <= {1'b0,r_register[reg_1]}+{1'b0,r_register[reg_2]};
+        {r_carry_flag,hold} = {1'b0,r_register[reg_1]}+{1'b0,r_register[reg_2]};
+        r_overflow_flag = (r_register[reg_1][15]&&r_register[reg_2][15]&&!hold[15])||(!r_register[reg_1][15]&&!r_register[reg_2][15]&&hold[15]) ? 1'b1 : 1'b0;
+        r_register[reg_1]<= hold;
+        
         r_SM<=OPCODE_REQUEST;  
         r_PC<=r_PC+1;  
           
@@ -248,13 +264,17 @@ endtask
 task t_minus_regs;
     reg [3:0] reg_1;
     reg [3:0] reg_2;
+    reg [15:0] hold;
     begin
         reg_2=w_opcode[3:0];
-        reg_1=w_opcode[7:4];    
+        reg_1=w_opcode[7:4];  
         r_zero_flag <= r_register[reg_1]-r_register[reg_2]==0 ? 1'b1 : 1'b0;
-        {r_carry_flag,r_register[reg_1]} <= {1'b0,r_register[reg_1]}-{1'b0,r_register[reg_2]};
+        {r_carry_flag,hold} = {1'b0,r_register[reg_1]}-{1'b0,r_register[reg_2]};
+        r_overflow_flag = (r_register[reg_1][15]&&!r_register[reg_2][15]&&!hold[15])||(!r_register[reg_1][15]&&r_register[reg_2][15]&&hold[15]) ? 1'b1 : 1'b0;
+        r_register[reg_1]<= hold;
+        
         r_SM<=OPCODE_REQUEST;  
-        r_PC<=r_PC+1;    
+        r_PC<=r_PC+1;      
     end
 endtask 
 
