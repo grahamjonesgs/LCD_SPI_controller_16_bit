@@ -70,7 +70,7 @@ casez(w_opcode[15:0])
                     16'hF010: t_nop;                                    // NOP No opperation
                     16'hF011: t_halt;                                   // HALT Freeze and hang
                     16'hF012: t_reset;                                  // RESET Reset
-                    16'h2013: t_delay(w_var1);                          // DELAYV Set value  
+                    16'hF013: t_delay(w_var1);                          // DELAYV Set value  
                     
                     default:
                     begin

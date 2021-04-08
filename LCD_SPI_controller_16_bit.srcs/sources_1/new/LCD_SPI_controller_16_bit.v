@@ -40,7 +40,7 @@ module LCD_SPI_controller_16_bit(
 parameter STACK_SIZE=1024;
 parameter OPCODE_REQUEST=16'h1, OPCODE_FETCH=16'h2, OPCODE_EXECUTE=16'h4, HCF_1=16'h8,HCF_2=16'h16,  HCF_3=16'h32, HCF_4=16'h64;
 parameter LOAD_START=16'h128, LOADING_BYTE=16'h256, LOAD_COMPLETE=16'h512;
-parameter ERR_INV_OPCODE=8'h1, ERR_INV_FSM_STATE=8'h2, ERR_STACK=8'h3, ERR_LOAD=8'h4;
+parameter ERR_INV_OPCODE=8'h1, ERR_INV_FSM_STATE=8'h2, ERR_STACK=8'h3, ERR_DATA_LOAD=8'h4, ERR_CHECKSUM_LOAD=8'h5;
 
 // UART receive control
 wire [7:0]   w_uart_rx_value;    // Received value
@@ -74,8 +74,10 @@ reg          o_ram_write_DV;
 reg  [15:0]  o_ram_write_value;
 reg  [11:0]  o_ram_write_addr;
 reg  [11:0]  r_ram_next_write_addr;
-
+reg  [7:0]   rx_count;
 reg  [1:0]   r_load_byte_counter;
+reg  [15:0]  r_checksum;
+reg  [15:0]  r_old_checksum;
 
 // Register control
 reg  [15:0]  r_register[15:0];
@@ -97,10 +99,6 @@ reg          r_stack_read_flag;
 reg          r_stack_write_flag;
 reg  [15:0]  r_stack_write_value;
 reg          r_stack_reset;
-//reg  [15:0]  o_stack_peek_pointer;
-
-// DEBUG
-reg  [7:0]   rx_count;
  
 uart_receive uart_receive1(
                  .clk(i_Clk), //input clock
@@ -159,7 +157,7 @@ rams_sp_nc rams_sp_nc1 (
                .write_en(o_ram_write_DV)
            );
 
- /*ila_0  myila(.clk(i_Clk),
+/* ila_0  myila(.clk(i_Clk),
  .probe0(w_opcode),
  .probe1(r_check_number),
  .probe2(r_PC),
@@ -175,7 +173,7 @@ rams_sp_nc rams_sp_nc1 (
  .probe12(o_LCD_DC),
  .probe13(o_LCD_reset_n),
  .probe14(r_zero_flag),
- .probe15(1'b0));*/
+ .probe15(1'b0)); */
 
 `include "timing_tasks.vh"
     `include "LCD_tasks.vh"
@@ -238,6 +236,8 @@ begin
         r_load_byte_counter<=0;
         o_ram_write_addr<=12'h0;
         r_ram_next_write_addr<=12'h0;
+        r_checksum<=16'h0;
+        r_old_checksum<=16'h0;
     end
     else
     begin
@@ -259,7 +259,7 @@ begin
                             else
                             begin
                                 r_SM<=HCF_1; // Halt and catch fire error
-                                r_error_code<=ERR_LOAD;
+                                r_error_code<=ERR_DATA_LOAD;
                             end // else (r_load_byte_counter==3)
                         end // case 8'h58
                         8'h0a: ; // ignore LF
@@ -268,13 +268,13 @@ begin
                         begin
                             case (r_load_byte_counter)
                                 0:
-                                    o_ram_write_value[15:12]<=return_hex_from_ascii(w_uart_rx_value);
+                                    o_ram_write_value[15:12]=return_hex_from_ascii(w_uart_rx_value);
                                 1:
-                                    o_ram_write_value[11:8]<=return_hex_from_ascii(w_uart_rx_value);
+                                    o_ram_write_value[11:8]=return_hex_from_ascii(w_uart_rx_value);
                                 2:
-                                    o_ram_write_value[7:4]<=return_hex_from_ascii(w_uart_rx_value);
+                                    o_ram_write_value[7:4]=return_hex_from_ascii(w_uart_rx_value);
                                 3:
-                                    o_ram_write_value[3:0]<=return_hex_from_ascii(w_uart_rx_value);
+                                    o_ram_write_value[3:0]=return_hex_from_ascii(w_uart_rx_value);
                                 default:
                                     ;
                             endcase //r_load_byte_counter
@@ -284,6 +284,8 @@ begin
                                 o_ram_write_addr<=r_ram_next_write_addr;
                                 r_ram_next_write_addr<=r_ram_next_write_addr+1;
                                 o_ram_write_DV<=1'b1;
+                                r_old_checksum<=r_checksum;
+                                r_checksum<=r_checksum+o_ram_write_value;
                             end // if (r_load_byte_counter==3)
                             else
                             begin
@@ -294,20 +296,37 @@ begin
                 end
             end
 
+            
+
             LOAD_COMPLETE:
             begin
-                r_seven_seg_value=32'h20_10_00_02;
-                o_TX_LCD_Count<=4'd1;
-                o_TX_LCD_Byte<=8'b0;
-                r_SM<=OPCODE_REQUEST;
-                r_timeout_counter<=0;
-                o_LCD_reset_n<=1'b0;
-                r_PC<=12'h0;
-                r_zero_flag<=0;
-                r_error_code<=8'h0;
-                rx_count<=8'b0;
-                o_ram_write_addr<=12'h0;
-                r_stack_reset<=1'b0;
+                //r_seven_seg_value=32'h20_10_00_02;
+                // Check checksum
+                r_checksum=r_old_checksum; // remove last value from checksum, as was checksum incomming
+                r_seven_seg_value<={4'h0,r_checksum[15:12],4'h0,r_checksum[11:8],4'h0,r_checksum[7:4],4'h0,r_checksum[3:0]};     
+        
+                if (r_checksum==o_ram_write_value)
+                begin
+                    o_TX_LCD_Count<=4'd1;
+                    o_TX_LCD_Byte<=8'b0;
+                    r_SM<=OPCODE_REQUEST;
+                    r_timeout_counter<=0;
+                    o_LCD_reset_n<=1'b0;
+                    r_PC<=12'h0;
+                    r_error_code<=8'h0;
+                    r_zero_flag<=1'b0;
+                    r_carry_flag<=1'b0;
+                    r_overflow_flag<=1'b0;
+                    r_equal_flag<=1'b0;          
+                    rx_count<=8'b0;
+                    o_ram_write_addr<=12'h0;
+                    r_stack_reset<=1'b0;
+                end
+                else
+                begin
+                    r_SM<=HCF_1; // Halt and catch fire error
+                    r_error_code<=ERR_CHECKSUM_LOAD;
+                end
             end
 
             OPCODE_REQUEST:
@@ -334,66 +353,7 @@ begin
                         
             OPCODE_EXECUTE:
             begin
-            t_opcode_select;
-                /*casez(w_opcode[15:0])
-                    16'h2001: spi_dc_write_command(w_var1);
-                    16'h2002: spi_dc_write_data(w_var1);
-                    16'h2003: t_delay(w_var1);
-                    16'h2004: t_led_state(w_var1);
-                    16'h2005: t_lcd_reset(w_var1);
-                        
-                    16'h201?: spi_dc_write_command_reg;
-                    16'h202?: spi_dc_data_command_reg;
-                    16'h203?: t_delay_reg;
-                    16'h204?: t_led_reg;
-                    16'h205?: t_get_switch_reg;
-
-                    16'h010?: t_set_reg(w_var1);
-                    16'h011?: t_inc_value_reg(w_var1);
-                    16'h012?: t_dec_value_reg(w_var1);
-                    16'h013?: t_compare_reg_value(w_var1);
-                    16'h014?: t_inc_reg;
-                    16'h015?: t_dec_reg;
-                    16'h04??: t_copy_reg;
-                    16'h05??: t_and_reg;
-                    16'h06??: t_or_reg;
-                    16'h07??: t_xor_reg;
-                    16'h080?: t_and_reg_value(w_var1);
-                    16'h081?: t_or_reg_value(w_var1);
-                    16'h082?: t_xor_reg_value(w_var1);
-                    16'h09??: t_compare_regs;
-                    
-                    16'h0208:  t_cond_zero_jump(w_var1); // 0208
-                    16'h0209:  t_cond_zero_jump(w_var1); // 0208
-                    16'h020A:  t_cond_equal_jump(w_var1); // 020A 
-                    16'h020B:  t_cond_equal_jump(w_var1); // 020A 
-                    
-                    
-                    
-                        
-                    16'h020C: t_call(w_var1); 
-                    16'h020D: t_ret;  
-                    16'h020E: t_nop;        
-                    16'h0210: t_jump(w_var1);
-
-                    16'h0300: t_stack_push_value(w_var1);
-                    16'h031?: t_stack_push_reg;
-                    16'h032?: t_stack_pop_reg;
-                    16'h033?: t_stack_peek_reg;
-                    
-                    16'h2100: t_7_seg_value(w_var1);
-                    16'h211?: t_7_seg_reg(w_var1);
-                    16'hFFFF: // Reset
-                    begin
-                        r_SM<=OPCODE_REQUEST;
-                        r_PC<=12'h0;
-                    end // Case FFFF
-                    default:
-                    begin
-                        r_SM<=HCF_1; // Halt and catch fire error 1
-                        r_error_code<=ERR_INV_OPCODE;
-                    end // default case
-                endcase //casez(w_opcode[15:0]) */
+                t_opcode_select;
             end // case OPCODE_EXECUTE
             HCF_1:
             begin

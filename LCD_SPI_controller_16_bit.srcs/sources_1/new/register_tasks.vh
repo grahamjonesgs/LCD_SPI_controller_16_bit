@@ -194,7 +194,7 @@ task t_dec_reg;
     begin
         reg_1=w_opcode[3:0];
         r_zero_flag <= r_register[reg_1]-1==0 ? 1'b1 : 1'b0;
-        {r_carry_flag,hold} <= {1'b0,r_register[reg_1]}-{17'b1};
+        {r_carry_flag,hold} = {1'b0,r_register[reg_1]}-{17'b1};
         r_overflow_flag = (r_register[reg_1][15]&&!hold[15]) ? 1'b1 : 1'b0;
         r_register[reg_1]<= hold;
         r_SM<=OPCODE_REQUEST;  
@@ -212,7 +212,7 @@ task t_inc_reg;
     begin
         reg_1=w_opcode[3:0];
         r_zero_flag <= r_register[reg_1]-1==0 ? 1'b1 : 1'b0;
-        {r_carry_flag,hold} <= {1'b0,r_register[reg_1]}-{17'b1};
+        {r_carry_flag,hold} = {1'b0,r_register[reg_1]}-{17'b1};
         r_overflow_flag = (!r_register[reg_1][15]&&hold[15]) ? 1'b1 : 1'b0;
         r_register[reg_1]<= hold;
         r_SM<=OPCODE_REQUEST;  
