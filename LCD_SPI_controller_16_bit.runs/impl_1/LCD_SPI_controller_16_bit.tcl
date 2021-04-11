@@ -124,8 +124,6 @@ set ACTIVE_STEP init_design
 set rc [catch {
   create_msg_db init_design.pb
   set_param chipscope.maxJobs 1
-  set_param tcl.collectionResultDisplayLimit 0
-  set_param xicom.use_bs_reader 1
 OPTRACE "create in-memory project" START { }
   create_project -in_memory -part xc7a35tcpg236-1
   set_property design_mode GateLvl [current_fileset]
@@ -179,7 +177,10 @@ OPTRACE "Opt Design: write_checkpoint" START { CHECKPOINT }
   write_checkpoint -force LCD_SPI_controller_16_bit_opt.dcp
 OPTRACE "Opt Design: write_checkpoint" END { }
 OPTRACE "opt_design reports" START { REPORT }
-  create_report "impl_1_opt_report_drc_0" "report_drc -file LCD_SPI_controller_16_bit_drc_opted.rpt -pb LCD_SPI_controller_16_bit_drc_opted.pb -rpx LCD_SPI_controller_16_bit_drc_opted.rpx"
+  create_report "impl_1_opt_report_drc_0" "report_drc -file opt_report_drc_0.rpt -pb opt_report_drc_0.pb -rpx opt_report_drc_0.rpx"
+  create_report "impl_1_opt_report_utilization_0" "report_utilization -file opt_report_utilization_0.rpt -pb opt_report_utilization_0.pb"
+  create_report "impl_1_opt_report_methodology_0" "report_methodology -file opt_report_methodology_0.rpt -pb opt_report_methodology_0.pb -rpx opt_report_methodology_0.rpx"
+  create_report "impl_1_opt_report_timing_summary_0" "report_timing_summary -max_paths 10 -file opt_report_timing_summary_0.rpt -pb opt_report_timing_summary_0.pb -rpx opt_report_timing_summary_0.rpx"
 OPTRACE "opt_design reports" END { }
   close_msg_db -file opt_design.pb
 } RESULT]
@@ -205,7 +206,7 @@ OPTRACE "implement_debug_core" START { }
 OPTRACE "implement_debug_core" END { }
   } 
 OPTRACE "place_design" START { }
-  place_design 
+  place_design -directive WLDrivenBlockPlacement
 OPTRACE "place_design" END { }
 OPTRACE "read constraints: place_design_post" START { }
 OPTRACE "read constraints: place_design_post" END { }
@@ -213,9 +214,9 @@ OPTRACE "Place Design: write_checkpoint" START { CHECKPOINT }
   write_checkpoint -force LCD_SPI_controller_16_bit_placed.dcp
 OPTRACE "Place Design: write_checkpoint" END { }
 OPTRACE "place_design reports" START { REPORT }
-  create_report "impl_1_place_report_io_0" "report_io -file LCD_SPI_controller_16_bit_io_placed.rpt"
-  create_report "impl_1_place_report_utilization_0" "report_utilization -file LCD_SPI_controller_16_bit_utilization_placed.rpt -pb LCD_SPI_controller_16_bit_utilization_placed.pb"
-  create_report "impl_1_place_report_control_sets_0" "report_control_sets -verbose -file LCD_SPI_controller_16_bit_control_sets_placed.rpt"
+  create_report "impl_1_place_report_io_0" "report_io -file place_report_io_0.rpt"
+  create_report "impl_1_place_report_incremental_reuse_0" "report_incremental_reuse -file place_report_incremental_reuse_0.rpt"
+  create_report "impl_1_place_report_timing_summary_0" "report_timing_summary -max_paths 10 -file place_report_timing_summary_0.rpt -pb place_report_timing_summary_0.pb -rpx place_report_timing_summary_0.rpx"
 OPTRACE "place_design reports" END { }
   close_msg_db -file place_design.pb
 } RESULT]
@@ -236,7 +237,7 @@ set rc [catch {
 OPTRACE "read constraints: phys_opt_design" START { }
 OPTRACE "read constraints: phys_opt_design" END { }
 OPTRACE "phys_opt_design" START { }
-  phys_opt_design 
+  phys_opt_design -directive AggressiveFanoutOpt
 OPTRACE "phys_opt_design" END { }
 OPTRACE "read constraints: phys_opt_design_post" START { }
 OPTRACE "read constraints: phys_opt_design_post" END { }
@@ -244,6 +245,8 @@ OPTRACE "Post-Place Phys Opt Design: write_checkpoint" START { CHECKPOINT }
   write_checkpoint -force LCD_SPI_controller_16_bit_physopt.dcp
 OPTRACE "Post-Place Phys Opt Design: write_checkpoint" END { }
 OPTRACE "phys_opt_design report" START { REPORT }
+  create_report "impl_1_phys_opt_report_timing_summary_0" "report_timing_summary -max_paths 10 -file phys_opt_report_timing_summary_0.rpt -pb phys_opt_report_timing_summary_0.pb -rpx phys_opt_report_timing_summary_0.rpx"
+  create_report "impl_1_phys_opt_report_design_analysis_0" "report_design_analysis -congestion -timing -logic_level_distribution -max_paths 100 -file phys_opt_report_design_analysis_0.rpt"
 OPTRACE "phys_opt_design report" END { }
   close_msg_db -file phys_opt_design.pb
 } RESULT]
@@ -264,7 +267,7 @@ set rc [catch {
 OPTRACE "read constraints: route_design" START { }
 OPTRACE "read constraints: route_design" END { }
 OPTRACE "route_design" START { }
-  route_design 
+  route_design -directive AggressiveExplore
 OPTRACE "route_design" END { }
 OPTRACE "read constraints: route_design_post" START { }
 OPTRACE "read constraints: route_design_post" END { }
@@ -272,14 +275,16 @@ OPTRACE "Route Design: write_checkpoint" START { CHECKPOINT }
   write_checkpoint -force LCD_SPI_controller_16_bit_routed.dcp
 OPTRACE "Route Design: write_checkpoint" END { }
 OPTRACE "route_design reports" START { REPORT }
-  create_report "impl_1_route_report_drc_0" "report_drc -file LCD_SPI_controller_16_bit_drc_routed.rpt -pb LCD_SPI_controller_16_bit_drc_routed.pb -rpx LCD_SPI_controller_16_bit_drc_routed.rpx"
-  create_report "impl_1_route_report_methodology_0" "report_methodology -file LCD_SPI_controller_16_bit_methodology_drc_routed.rpt -pb LCD_SPI_controller_16_bit_methodology_drc_routed.pb -rpx LCD_SPI_controller_16_bit_methodology_drc_routed.rpx"
-  create_report "impl_1_route_report_power_0" "report_power -file LCD_SPI_controller_16_bit_power_routed.rpt -pb LCD_SPI_controller_16_bit_power_summary_routed.pb -rpx LCD_SPI_controller_16_bit_power_routed.rpx"
-  create_report "impl_1_route_report_route_status_0" "report_route_status -file LCD_SPI_controller_16_bit_route_status.rpt -pb LCD_SPI_controller_16_bit_route_status.pb"
-  create_report "impl_1_route_report_timing_summary_0" "report_timing_summary -max_paths 10 -file LCD_SPI_controller_16_bit_timing_summary_routed.rpt -pb LCD_SPI_controller_16_bit_timing_summary_routed.pb -rpx LCD_SPI_controller_16_bit_timing_summary_routed.rpx -warn_on_violation "
-  create_report "impl_1_route_report_incremental_reuse_0" "report_incremental_reuse -file LCD_SPI_controller_16_bit_incremental_reuse_routed.rpt"
-  create_report "impl_1_route_report_clock_utilization_0" "report_clock_utilization -file LCD_SPI_controller_16_bit_clock_utilization_routed.rpt"
-  create_report "impl_1_route_report_bus_skew_0" "report_bus_skew -warn_on_violation -file LCD_SPI_controller_16_bit_bus_skew_routed.rpt -pb LCD_SPI_controller_16_bit_bus_skew_routed.pb -rpx LCD_SPI_controller_16_bit_bus_skew_routed.rpx"
+  create_report "impl_1_route_report_utilization_0" "report_utilization -file route_report_utilization_0.rpt -pb route_report_utilization_0.pb"
+  create_report "impl_1_route_report_clock_utilization_0" "report_clock_utilization -file route_report_clock_utilization_0.rpt"
+  create_report "impl_1_route_report_drc_0" "report_drc -file route_report_drc_0.rpt -pb route_report_drc_0.pb -rpx route_report_drc_0.rpx"
+  create_report "impl_1_route_report_power_0" "report_power -file route_report_power_0.rpt -pb route_report_power_summary_0.pb -rpx route_report_power_0.rpx"
+  create_report "impl_1_route_report_route_status_0" "report_route_status -file route_report_route_status_0.rpt -pb route_report_route_status_0.pb"
+  create_report "impl_1_route_report_timing_summary_0" "report_timing_summary -max_paths 10 -warn_on_violation -file route_report_timing_summary_0.rpt -pb route_report_timing_summary_0.pb -rpx route_report_timing_summary_0.rpx"
+  create_report "impl_1_route_report_design_analysis_0" "report_design_analysis -congestion -timing -logic_level_distribution -max_paths 100 -file route_report_design_analysis_0.rpt"
+  create_report "impl_1_route_report_qor_suggestions_0" "report_qor_suggestions -max_paths 100 -file route_report_qor_suggestions_0.rpt"
+  create_report "impl_1_route_report_incremental_reuse_0" "report_incremental_reuse -file route_report_incremental_reuse_0.rpt"
+  create_report "impl_1_route_report_bus_skew_0" "report_bus_skew -warn_on_violation -file route_report_bus_skew_0.rpt -pb route_report_bus_skew_0.pb -rpx route_report_bus_skew_0.rpx"
 OPTRACE "route_design reports" END { }
 OPTRACE "route_design misc" START { }
   close_msg_db -file route_design.pb
@@ -308,7 +313,7 @@ OPTRACE "read constraints: write_bitstream" END { }
   catch { write_mem_info -force -no_partial_mmi LCD_SPI_controller_16_bit.mmi }
 OPTRACE "write_bitstream setup" END { }
 OPTRACE "write_bitstream" START { }
-  write_bitstream -force LCD_SPI_controller_16_bit.bit -bin_file
+  write_bitstream -force LCD_SPI_controller_16_bit.bit 
 OPTRACE "write_bitstream" END { }
 OPTRACE "write_bitstream misc" START { }
 OPTRACE "read constraints: write_bitstream_post" START { }

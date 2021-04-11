@@ -99,6 +99,8 @@ reg          r_stack_read_flag;
 reg          r_stack_write_flag;
 reg  [15:0]  r_stack_write_value;
 reg          r_stack_reset;
+
+integer      i; // For for loops
  
 uart_receive uart_receive1(
                  .clk(i_Clk), //input clock
@@ -331,8 +333,8 @@ begin
 
             OPCODE_REQUEST:
             begin
-                r_stack_write_flag<=1'b0;
-                r_stack_read_flag<=1'b0;
+                r_stack_write_flag<=2'h0;
+                r_stack_read_flag<=2'h0;
                 if(i_stack_error)
                 begin
                     r_SM<=HCF_1; // Halt and catch fire error 1
@@ -357,8 +359,8 @@ begin
             end // case OPCODE_EXECUTE
             HCF_1:
             begin
-                r_stack_write_flag<=1'b0;
-                r_stack_read_flag<=1'b0;
+                r_stack_write_flag<=2'h0;
+                r_stack_read_flag<=2'h0;
                 r_timeout_counter<=0;
                 r_SM<=HCF_2;
             end
@@ -386,10 +388,43 @@ begin
             HCF_4:
             begin
                 if (r_error_display_type)
-                    r_seven_seg_value<={4'h2,4'h2,4'h0,r_PC[11:8],4'h0,r_PC[7:4],4'h0,r_PC[3:0]};
-                else
-                    r_seven_seg_value<={4'h0,w_opcode[15:12],4'h0,w_opcode[11:8],4'h0,w_opcode[7:4],4'h0,w_opcode[3:0]};
-                    r_timeout_max<=32'd100_000_000;
+                begin
+                    // ERR_INV_OPCODE=8'h1, ERR_INV_FSM_STATE=8'h2, ERR_STACK=8'h3, ERR_DATA_LOAD=8'h4, ERR_CHECKSUM_LOAD=8'h5;
+                    
+                    case (r_error_code)
+                    ERR_CHECKSUM_LOAD: 
+                        // incoming checksum
+                        r_seven_seg_value<={4'h0,r_checksum[15:12],4'h0,r_checksum[11:8],4'h0,r_checksum[7:4],4'h0,r_checksum[3:0]}; 
+                    ERR_DATA_LOAD: 
+                         // Load counter       
+                         r_seven_seg_value<={8'h24,4'h0,r_ram_next_write_addr[11:8],4'h0,r_ram_next_write_addr[7:4],4'h0,r_ram_next_write_addr[3:0]};
+                    default: // Also for opcode 1
+                        // Blank then Progam counter
+                        r_seven_seg_value<={8'h22,4'h0,r_PC[11:8],4'h0,r_PC[7:4],4'h0,r_PC[3:0]};
+                 
+                    
+                    endcase
+                end   // if (r_error_display_type)
+                else 
+                begin
+                    
+                    case (r_error_code)
+                    ERR_CHECKSUM_LOAD: 
+                        // Calculated checksim
+                        r_seven_seg_value<={4'h0,o_ram_write_value[15:12],4'h0,o_ram_write_value[11:8],4'h0,o_ram_write_value[7:4],4'h0,o_ram_write_value[3:0]};
+                    
+                    ERR_DATA_LOAD: 
+                         // Three blanks then loading byte counter
+                         r_seven_seg_value<={8'h22,8'h22,8'h22,6'h0,r_load_byte_counter[1:0]}; 
+                    
+                    default // Also for opcode 1
+                        // Opcode selected
+                        r_seven_seg_value<={4'h0,w_opcode[15:12],4'h0,w_opcode[11:8],4'h0,w_opcode[7:4],4'h0,w_opcode[3:0]};
+                    endcase
+                    
+                end   // else if (r_error_display_type)
+                    
+                r_timeout_max<=32'd100_000_000;
                 if(r_timeout_counter>=r_timeout_max)
                 begin
                     r_timeout_counter<=0;

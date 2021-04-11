@@ -63,7 +63,7 @@ casez(w_opcode[15:0])
                     16'h400?: t_stack_push_reg;                         // PUSH Push register onto stack
                     16'h401?: t_stack_pop_reg;                          // POP Pop stack into register
                     16'h402?: t_stack_peek_reg;                         // PEEK Peek stack into register 
-                    16'h4030: t_stack_push_value(w_var1);               // PUSHV Push value onto stack   
+                    16'h4030: t_stack_push_value(w_var1);               // PUSHV Push value onto stack
                              
 // Other Fxxx
                     16'hF00?: t_delay_reg;                              // DELAYR Delay with register

@@ -4,18 +4,21 @@
 module stack (
            input clk,
            input i_reset,
-           input i_read_flag,
-           input i_write_flag,
+           input [1:0] i_read_flag, // 0 nothing, 1, one reg, 2 16 regs
+           input [1:0] i_write_flag, // 0 nothing, 1, one reg, 2 16 regs
            input [15:0] i_write_value,
+           input [512:0] i_write_value_16,
            input [15:0] i_peek_pointer,
            input i_stack_reset,
            output reg [15:0] o_stack_top_value,
+           output reg [512:0] o_stack_top_value_16,
            output reg [15:0] o_stack_peek_value,
            output reg o_stack_error
        );
 
 (* ram_style = "block" *) reg [15:0] RAM [1023:0];
 reg [15:0] r_stack_pointer;
+integer i;
 
 initial
 begin
@@ -32,7 +35,8 @@ begin
     end //if (i_reset)
     else
     begin
-        if (i_read_flag)
+        case (i_read_flag)
+        2'h1: // read 1 reg
         begin
             if (r_stack_pointer==0)
             begin
@@ -42,8 +46,13 @@ begin
             begin
                 r_stack_pointer<=r_stack_pointer-1;
             end // else if if(r_stack_pointer==0)
-        end // if (i_read)
-        if (i_write_flag)
+        end // if (i_read==1)
+        default: ; // do nothing
+        endcase //i_read_flag
+        
+             
+        case (i_write_flag)
+        2'h1:  // write 16 regs
         begin
             if (r_stack_pointer>1022)
             begin
@@ -54,7 +63,14 @@ begin
                 RAM[r_stack_pointer]<=i_write_value;
                 r_stack_pointer<=r_stack_pointer+1;
             end // else if (r_stack_pointer>1022)
-        end //if (i_write_flag)
+        end //if (i_write_flag==1)
+        
+        
+        
+        default: ; // do nothing
+        endcase //i_read_flag
+        
+        
     end // else if (i_reset)
 end // always clock
 
