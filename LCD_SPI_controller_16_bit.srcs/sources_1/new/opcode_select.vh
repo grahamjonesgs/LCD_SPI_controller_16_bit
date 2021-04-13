@@ -1,7 +1,19 @@
 // Can be read by assembler, so format is fixed. Opcode must be first word in comment. If opcode takes variable, it mst be passed as w_var1
+/* Macro definition
+$POPALL POP A / POP B / POP C 
+$PUSHALL PUSH A / PUSH B / PUSH C
+$WAIT DELAYV %1 / DELAYV %2 
+$TESTM NOP / NOP / NOP
+$TESTM2 NOP
+$IMBED1 DELAYV 0xFFFF / $PUSHALL
+$IMBED2 $PUSHALL / $IMBED1
+
+*/
+
 task t_opcode_select;
 begin
 casez(w_opcode[15:0])
+
 
 // Register control 0xxx
                     16'h01??: t_copy_regs;                              // COPY Copy register
