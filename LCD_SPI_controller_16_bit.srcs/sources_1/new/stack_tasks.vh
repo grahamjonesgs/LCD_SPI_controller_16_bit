@@ -42,25 +42,3 @@ task t_stack_pop_reg;
         r_PC<=r_PC+1;  
     end
 endtask  
-
-// Peek register from stack
-// On completion
-// increment PC
-// increment r_SM
-task t_stack_peek_reg;
-    reg [3:0] reg_1;
-    begin
-        reg_1=w_opcode[3:0];
-        if (r_extra_cycle==0)
-        begin
-            r_extra_cycle<=1;
-        end //if (r_extra_cycle==0)
-        else
-        begin    
-            r_register[reg_1] <= i_stack_peek_value;
-            r_SM<=OPCODE_REQUEST;  
-            r_PC<=r_PC; 
-            r_extra_cycle<=0; 
-        end // else if (r_extra_cycle==0)
-     end
-endtask  

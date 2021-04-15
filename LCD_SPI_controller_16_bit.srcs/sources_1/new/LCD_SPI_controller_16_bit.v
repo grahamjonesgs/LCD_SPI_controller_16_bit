@@ -61,9 +61,8 @@ reg  [31:0]  r_timeout_counter;
 reg  [31:0]  r_timeout_max;
 
 // Machine control
-reg  [15:0]  r_SM;
-reg          r_ram_read_DV;
-reg  [11:0]  r_PC;
+reg  [15:0]  r_SM;;
+reg  [14:0]  r_PC;
 wire [15:0]  w_opcode;
 wire [15:0]  w_var1;
 wire [15:0]  w_var2;
@@ -93,7 +92,6 @@ reg          r_error_display_type;
 
 // Stack control
 wire [15:0]  i_stack_top_value;
-wire [15:0]  i_stack_peek_value;
 wire         i_stack_error;
 reg          r_stack_read_flag;
 reg          r_stack_write_flag;
@@ -114,11 +112,9 @@ stack main_stack (
           .i_reset(i_Rst_H),
           .i_read_flag(r_stack_read_flag),
           .i_write_flag(r_stack_write_flag),
-          .i_peek_pointer(w_var1),
           .i_write_value(r_stack_write_value),
           .i_stack_reset(r_stack_reset),
           .o_stack_top_value(i_stack_top_value),
-          .o_stack_peek_value(i_stack_peek_value),
           .o_stack_error(i_stack_error));
 
 Seven_seg_LED_Display_Controller Seven_seg_LED_Display_Controller1 (
@@ -149,8 +145,7 @@ SPI_Master_With_Single_CS SPI_Master_With_Single_CS_inst (
 
 rams_sp_nc rams_sp_nc1 (
                .clk(i_Clk),
-               .read_en(r_ram_read_DV),
-               .read_addr(r_PC),
+               .opcode_read_addr(r_PC),
                .dout_opcode(w_opcode),
                .dout_var1(w_var1),
                .dout_var2(w_var2),
@@ -342,14 +337,12 @@ begin
                 end // default case
                 else
                 begin
-                    r_ram_read_DV<=1;
                     r_SM<=OPCODE_FETCH;
                 end
             end
             
             OPCODE_FETCH:
             begin
-                r_ram_read_DV<=0;
                 r_SM<=OPCODE_EXECUTE;
             end
                         
@@ -364,6 +357,7 @@ begin
                 r_timeout_counter<=0;
                 r_SM<=HCF_2;
             end
+            
             HCF_2:
             begin
                 r_seven_seg_value[31:8]<=24'h230C0F;
