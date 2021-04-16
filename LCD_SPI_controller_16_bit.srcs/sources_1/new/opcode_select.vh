@@ -75,6 +75,9 @@ casez(w_opcode[15:0])
                     16'h400?: t_stack_push_reg;                         // PUSH Push register onto stack
                     16'h401?: t_stack_pop_reg;                          // POP Pop stack into register
                     16'h4020: t_stack_push_value(w_var1);               // PUSHV Push value onto stack
+                    
+// Coms 5xxxx
+                    16'h5000: t_test_msg;                               // TESTMSG test UART message
                              
 // Other Fxxx
                     16'hF00?: t_delay_reg;                              // DELAYR Delay with register

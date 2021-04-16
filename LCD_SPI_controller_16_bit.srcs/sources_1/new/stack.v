@@ -9,7 +9,6 @@ module stack (
            input [15:0] i_write_value,
            input i_stack_reset,
            output reg [15:0] o_stack_top_value,
-           output reg [15:0] o_stack_peek_value,
            output reg o_stack_error
        );
 

@@ -25,6 +25,7 @@ module LCD_SPI_controller_16_bit(
            input                i_Rst_H,     // FPGA Reset
            input                i_Clk,       // FPGA Clock
            input                i_uart_rx,
+           output               o_uart_tx,
            output reg   [15:0]  o_led,
            output               o_SPI_LCD_Clk,
            input                i_SPI_LCD_MISO,
@@ -38,8 +39,8 @@ module LCD_SPI_controller_16_bit(
        );
  
 parameter STACK_SIZE=1024;
-parameter OPCODE_REQUEST=16'h1, OPCODE_FETCH=16'h2, OPCODE_EXECUTE=16'h4, HCF_1=16'h8,HCF_2=16'h16,  HCF_3=16'h32, HCF_4=16'h64;
-parameter LOAD_START=16'h128, LOADING_BYTE=16'h256, LOAD_COMPLETE=16'h512;
+parameter OPCODE_REQUEST=16'd1, OPCODE_FETCH=16'd2, OPCODE_EXECUTE=16'd4, HCF_1=16'd8,HCF_2=16'd16,  HCF_3=16'd32, HCF_4=16'd64;
+parameter LOAD_START=16'd128, LOADING_BYTE=16'd256, LOAD_COMPLETE=16'd512, LOAD_WAIT=16'd1024;
 parameter ERR_INV_OPCODE=8'h1, ERR_INV_FSM_STATE=8'h2, ERR_STACK=8'h3, ERR_DATA_LOAD=8'h4, ERR_CHECKSUM_LOAD=8'h5;
 
 // UART receive control
@@ -98,7 +99,23 @@ reg          r_stack_write_flag;
 reg  [15:0]  r_stack_write_value;
 reg          r_stack_reset;
 
-integer      i; // For for loops
+// UART send message
+reg [4095:0]    r_msg;
+reg [7:0]   r_msg_length;
+reg         r_msg_send_DV;
+wire        i_msg_sent_DV;
+wire        i_sending_msg;
+ 
+ 
+uart_send_msg  uart_send_msg1 (
+                .i_Clk(i_Clk),
+                .i_msg_flat(r_msg),
+                .i_msg_length(r_msg_length),
+                .i_msg_send_DV(r_msg_send_DV),
+                .o_Tx_Serial(o_uart_tx),
+                .o_msg_sent_DV(i_msg_sent_DV),
+                .o_sending_msg(i_sending_msg)); 
+                
  
 uart_receive uart_receive1(
                  .clk(i_Clk), //input clock
@@ -181,6 +198,7 @@ rams_sp_nc rams_sp_nc1 (
     `include "functions.vh"
     `include "7_seg.vh"
     `include "opcode_select.vh"
+    `include "uart_tasks.vh"
 
 initial
 begin
@@ -203,6 +221,7 @@ begin
     r_ram_next_write_addr=12'h0;
     r_extra_cycle=1'b0;
     r_stack_reset=1'b0;
+    r_msg_send_DV<=1'b0;
 end
 
 always @(posedge i_Clk)
@@ -226,6 +245,7 @@ begin
         r_seven_seg_value=32'h20_10_00_03;
         r_extra_cycle=1'b0;
         r_stack_reset=1'b0;
+        r_msg_send_DV<=1'b0;
     end // if (i_Rst_H)
     else if(w_uart_rx_DV&w_uart_rx_value==8'h53) // Load start flag received
     begin
@@ -238,6 +258,7 @@ begin
     end
     else
     begin
+        r_msg_send_DV<=1'b0;
         case(r_SM)
             LOADING_BYTE:
             begin
@@ -293,8 +314,6 @@ begin
                 end
             end
 
-            
-
             LOAD_COMPLETE:
             begin
                 //r_seven_seg_value=32'h20_10_00_02;
@@ -318,11 +337,13 @@ begin
                     rx_count<=8'b0;
                     o_ram_write_addr<=12'h0;
                     r_stack_reset<=1'b0;
+                    t_tx_message(8'd1);
                 end
                 else
                 begin
                     r_SM<=HCF_1; // Halt and catch fire error
                     r_error_code<=ERR_CHECKSUM_LOAD;
+                    t_tx_message(8'd2);
                 end
             end
 
@@ -330,6 +351,7 @@ begin
             begin
                 r_stack_write_flag<=2'h0;
                 r_stack_read_flag<=2'h0;
+                r_msg_send_DV<=1'b0;
                 if(i_stack_error)
                 begin
                     r_SM<=HCF_1; // Halt and catch fire error 1

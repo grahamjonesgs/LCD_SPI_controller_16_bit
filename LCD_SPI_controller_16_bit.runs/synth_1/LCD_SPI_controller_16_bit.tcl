@@ -71,6 +71,7 @@ proc create_report { reportName command } {
 }
 OPTRACE "synth_1" START { ROLLUP_AUTO }
 set_param chipscope.maxJobs 1
+set_param xicom.use_bs_reader 1
 set_msg_config  -string {{HW Target shutdown}}  -suppress 
 OPTRACE "Creating in-memory project" START { }
 create_project -in_memory -part xc7a35tcpg236-1
@@ -90,6 +91,7 @@ read_verilog {
   /home/graham/Documents/LCD_SPI_controller_16_bit/LCD_SPI_controller_16_bit.srcs/sources_1/new/opcode_select.vh
   /home/graham/Documents/LCD_SPI_controller_16_bit/LCD_SPI_controller_16_bit.srcs/sources_1/new/timing_tasks.vh
   /home/graham/Documents/LCD_SPI_controller_16_bit/LCD_SPI_controller_16_bit.srcs/sources_1/new/led_tasks.vh
+  /home/graham/Documents/LCD_SPI_controller_16_bit/LCD_SPI_controller_16_bit.srcs/sources_1/new/uart_tasks.vh
   /home/graham/Documents/LCD_SPI_controller_16_bit/LCD_SPI_controller_16_bit.srcs/sources_1/new/register_tasks.vh
   /home/graham/Documents/LCD_SPI_controller_16_bit/LCD_SPI_controller_16_bit.srcs/sources_1/new/control_tasks.vh
   /home/graham/Documents/LCD_SPI_controller_16_bit/LCD_SPI_controller_16_bit.srcs/sources_1/new/functions.vh
@@ -104,6 +106,8 @@ read_verilog -library xil_defaultlib {
   /home/graham/Documents/LCD_SPI_controller_16_bit/LCD_SPI_controller_16_bit.srcs/sources_1/new/ram_sp.v
   /home/graham/Documents/LCD_SPI_controller_16_bit/LCD_SPI_controller_16_bit.srcs/sources_1/new/stack.v
   /home/graham/Documents/LCD_SPI_controller_16_bit/LCD_SPI_controller_16_bit.srcs/sources_1/new/uart_receive.v
+  /home/graham/Documents/LCD_SPI_controller_16_bit/LCD_SPI_controller_16_bit.srcs/sources_1/new/uart_send_msg.v
+  /home/graham/Documents/LCD_SPI_controller_16_bit/LCD_SPI_controller_16_bit.srcs/sources_1/new/uart_transmit.v
   /home/graham/Documents/LCD_SPI_controller_16_bit/LCD_SPI_controller_16_bit.srcs/sources_1/new/LCD_SPI_controller_16_bit.v
 }
 OPTRACE "Adding files" END { }
