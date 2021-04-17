@@ -24,8 +24,7 @@ parameter s_CLEANUP      = 3'b100;
   
   integer i;
    
-   // Instantiate uart_tx Module
-   uart_tx uart_tx_Inst (.i_Clock(i_Clk),
+   uart_tx uart_tx_Inst (.i_Clk(i_Clk),
    .i_Tx_DV(r_UART_Tx_DV),
    .i_Tx_Byte(r_UART_Tx_Byte),
    .o_Tx_Active(w_Tx_Active),

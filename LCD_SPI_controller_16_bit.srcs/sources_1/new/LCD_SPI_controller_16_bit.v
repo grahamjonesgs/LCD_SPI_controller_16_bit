@@ -22,11 +22,12 @@
    
  
 module LCD_SPI_controller_16_bit(
-           input                i_Rst_H,     // FPGA Reset
+           input                i_reset_H,     // Center button reset
            input                i_Clk,       // FPGA Clock
            input                i_uart_rx,
+           input                i_load_H,   // Load button
            output               o_uart_tx,
-           output reg   [15:0]  o_led,
+           output       [15:0]  o_led,
            output               o_SPI_LCD_Clk,
            input                i_SPI_LCD_MISO,
            output               o_SPI_LCD_MOSI,
@@ -67,7 +68,6 @@ reg  [14:0]  r_PC;
 wire [15:0]  w_opcode;
 wire [15:0]  w_var1;
 wire [15:0]  w_var2;
-reg          r_extra_cycle;
 
 //load control
 reg          o_ram_write_DV;
@@ -105,6 +105,9 @@ reg [7:0]   r_msg_length;
 reg         r_msg_send_DV;
 wire        i_msg_sent_DV;
 wire        i_sending_msg;
+
+// LED control
+reg [15:0]  r_led;
  
  
 uart_send_msg  uart_send_msg1 (
@@ -118,11 +121,11 @@ uart_send_msg  uart_send_msg1 (
                 
  
 uart_receive uart_receive1(
-                 .clk(i_Clk), //input clock
-                 .reset(i_Rst_H), //input reset
-                 .RxD(i_uart_rx), //input receving data line
-                 .RxData(w_uart_rx_value), // output for 8 bits data
-                 .RxDV(w_uart_rx_DV));
+                 .i_clk(i_Clk), //input clock
+                 .i_Rst_H(i_Rst_H), //input reset
+                 .i_RxD(i_uart_rx), //input receving data line
+                 .o_Rx_data(w_uart_rx_value), // output for 8 bits data
+                 .o_Rx_DV(w_uart_rx_DV));
 
 stack main_stack (
           .clk(i_Clk),
@@ -214,12 +217,11 @@ begin
     r_overflow_flag=0;
     r_error_code=8'h0;
     r_timeout_counter=32'b0;
-    r_seven_seg_value=32'h20_10_00_01;
-    o_led=16'h0;
+    r_seven_seg_value=32'h20_10_00_05;
+    r_led=16'h0;
     rx_count=8'b0;
     o_ram_write_addr=12'h0;
     r_ram_next_write_addr=12'h0;
-    r_extra_cycle=1'b0;
     r_stack_reset=1'b0;
     r_msg_send_DV<=1'b0;
 end
@@ -242,12 +244,11 @@ begin
         rx_count<=8'b0;
         o_ram_write_addr<=12'h0;
         r_ram_next_write_addr<=12'h0;
-        r_seven_seg_value=32'h20_10_00_03;
-        r_extra_cycle=1'b0;
+        r_seven_seg_value=32'h20_10_00_05;
         r_stack_reset=1'b0;
         r_msg_send_DV<=1'b0;
     end // if (i_Rst_H)
-    else if(w_uart_rx_DV&w_uart_rx_value==8'h53) // Load start flag received
+    else if(w_uart_rx_DV&w_uart_rx_value==8'h53&i_load_H) // Load start flag received
     begin
         r_SM<=LOADING_BYTE;
         r_load_byte_counter<=0;
@@ -316,10 +317,8 @@ begin
 
             LOAD_COMPLETE:
             begin
-                //r_seven_seg_value=32'h20_10_00_02;
-                // Check checksum
-                r_checksum=r_old_checksum; // remove last value from checksum, as was checksum incomming
-                r_seven_seg_value<={4'h0,r_checksum[15:12],4'h0,r_checksum[11:8],4'h0,r_checksum[7:4],4'h0,r_checksum[3:0]};     
+                r_seven_seg_value<=32'h22222222;
+                r_checksum=r_old_checksum; // remove last value from checksum, as was checksum incomming    
         
                 if (r_checksum==o_ram_write_value)
                 begin
@@ -458,5 +457,7 @@ begin
         endcase // case(r_SM)
     end // else if (i_Rst_H)
 end // always @(posedge i_Clk)
+
+assign o_led=r_led;
 
 endmodule

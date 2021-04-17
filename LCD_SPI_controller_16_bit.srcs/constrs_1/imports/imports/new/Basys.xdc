@@ -57,8 +57,12 @@ set_property IOSTANDARD LVCMOS33 [get_ports {o_Anode_Activate[2]}]
 set_property PACKAGE_PIN W4 [get_ports {o_Anode_Activate[3]}]
 set_property IOSTANDARD LVCMOS33 [get_ports {o_Anode_Activate[3]}]
 
-set_property PACKAGE_PIN U18 [get_ports i_Rst_H]
-set_property IOSTANDARD LVCMOS33 [get_ports i_Rst_H]
+# Centre button reset
+set_property PACKAGE_PIN U18 [get_ports i_reset_H]
+set_property IOSTANDARD LVCMOS33 [get_ports i_reset_H]
+# Down button download
+set_property PACKAGE_PIN U17 [get_ports i_load_H]
+set_property IOSTANDARD LVCMOS33 [get_ports i_load_H]
 	
 # LEDs
 set_property PACKAGE_PIN U16 [get_ports {o_led[0]}]					

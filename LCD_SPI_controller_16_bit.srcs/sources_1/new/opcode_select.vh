@@ -70,6 +70,7 @@ casez(w_opcode[15:0])
                     16'h302?: t_7_seg_reg;                              // 7SEGR Set 7 Seg to register
                     16'h3030: t_led_value(w_var1);                      // LEDV Set LED value
                     16'h3031: t_7_seg_value(w_var1);                    // 7SEGV Set 7 Seg to Value
+                    16'h3031: t_7_seg_blank;                            // 7SEGBLANK Blank 7 Seg
                                
 // Stack control 4xxx                
                     16'h400?: t_stack_push_reg;                         // PUSH Push register onto stack
@@ -77,7 +78,7 @@ casez(w_opcode[15:0])
                     16'h4020: t_stack_push_value(w_var1);               // PUSHV Push value onto stack
                     
 // Coms 5xxxx
-                    16'h5000: t_test_msg;                               // TESTMSG test UART message
+                    16'h5000: t_test_message;                           // TESTMSG test UART message
                              
 // Other Fxxx
                     16'hF00?: t_delay_reg;                              // DELAYR Delay with register

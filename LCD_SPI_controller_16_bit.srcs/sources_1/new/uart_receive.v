@@ -22,11 +22,11 @@
 
 
 module uart_receive(
-           input clk,      //input clock
-           input reset,    //input reset
-           input RxD,      //input receving data line
-           output reg [7:0]RxData, // output for 8 bits data
-           output reg RxDV
+           input            i_clk,      //input clock
+           input            i_Rst_H,    //input reset
+           input            i_RxD,      //input receving data line
+           output reg [7:0] o_Rx_data,  // output for 8 bits data
+           output reg       o_Rx_DV
        );
 
 //internal variables
@@ -41,7 +41,8 @@ reg dvflagsent;
 
 // constants
 parameter clk_freq = 100_000_000;  // system clock frequency
-parameter baud_rate = 9_600; //baud rate
+//parameter baud_rate = 9_600; //baud rate
+parameter baud_rate = 115_200; //baud rate
 parameter div_sample = 4; //oversampling
 parameter div_counter = clk_freq/(baud_rate*div_sample);  // this is the number we have to divide the system clock frequency to get a frequency (div_sample) time higher than (baud_rate)
 parameter mid_sample = (div_sample/2);  // this is the middle point of a bit where you want to sample it
@@ -53,15 +54,15 @@ begin
 end
 
 //UART receiver logic
-always @ (posedge clk)
+always @ (posedge i_clk)
 begin
-    if (reset)
+    if (i_Rst_H)
     begin // if reset is asserted
         state <=0; // set state to idle
         bitcounter <=0; // reset the bit counter
         counter <=0; // reset the counter
         samplecounter <=0; // reset the sample counter
-        //RxData=8'h0;
+        //o_Rx_data=8'h0;
     end
     else
     begin // if reset is not asserted
@@ -71,7 +72,7 @@ begin
             counter <=0; //reset the counter
             state <= nextstate; // assign the state to nextstate
             if (shift)
-                rxshiftreg <= {RxD,rxshiftreg[9:1]}; //if shift asserted, load the receiving data
+                rxshiftreg <= {i_RxD,rxshiftreg[9:1]}; //if shift asserted, load the receiving data
             if (clear_samplecounter)
                 samplecounter <=0; // if clear sampl counter asserted, reset sample counter
             if (inc_samplecounter)
@@ -86,9 +87,9 @@ end
 
 //state machine
 
-always @ (posedge clk) //trigger by clock
+always @ (posedge i_clk) //trigger by clock
 begin
-    RxDV<=1'b0;
+    o_Rx_DV<=1'b0;
     shift <= 0; // set shift to 0 to avoid any shifting
     clear_samplecounter <=0; // set clear sample counter to 0 to avoid reset
     inc_samplecounter <=0; // set increment sample counter to 0 to avoid any increment
@@ -99,13 +100,13 @@ begin
         0:
         begin // idle state
             dvflagsent=1'b0;
-            RxDV<=1'b0;
-            if (RxD) // if input RxD data line asserted
+            o_Rx_DV<=1'b0;
+            if (i_RxD) // if input i_RxD data line asserted
             begin
-                nextstate <=0; // back to idle state because RxD needs to be low to start transmission
+                nextstate <=0; // back to idle state because i_RxD needs to be low to start transmission
             end
             else
-            begin // if input RxD data line is not asserted
+            begin // if input i_RxD data line is not asserted
                 nextstate <=1; //jump to receiving state
                 clear_bitcounter <=1; // trigger to clear bit counter
                 clear_samplecounter <=1; // trigger to clear sample counter
@@ -121,15 +122,15 @@ begin
                 if (bitcounter == div_bit - 1)
                 begin // check if bit counter if 9 or not
                     nextstate <= 0; // back to idle state if bit counter is 9 as receving is complete
-                    RxData = rxshiftreg [8:1];
+                    o_Rx_data = rxshiftreg [8:1];
                     if(dvflagsent==0)
                     begin
-                        RxDV<=1'b1;
+                        o_Rx_DV<=1'b1;
                         dvflagsent<=1'b1;
                     end
                     else
                     begin
-                        RxDV<=1'b0;
+                        o_Rx_DV<=1'b0;
                     end
                 end
                 inc_bitcounter <=1; // trigger the increment bit counter if bit counter is not 9

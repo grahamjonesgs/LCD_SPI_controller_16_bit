@@ -6,7 +6,7 @@
 task t_led_value;
 input [15:0] i_state; 
     begin
-        o_led<=i_state;
+        r_led<=i_state;
         r_SM<=OPCODE_REQUEST;  
         r_PC<=r_PC+2;    
     end
@@ -20,7 +20,7 @@ task t_led_reg;
     reg [3:0] reg_1;
     begin
         reg_1=w_opcode[3:0];
-        o_led<=r_register[reg_1];
+        r_led<=r_register[reg_1];
         r_SM<=OPCODE_REQUEST;  
         r_PC<=r_PC+1;    
     end

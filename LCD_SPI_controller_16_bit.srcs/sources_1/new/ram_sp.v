@@ -3,17 +3,14 @@ module rams_sp_nc (clk, opcode_read_addr, dout_opcode, dout_var1,dout_var2, writ
 input clk;
 
 input [14:0] opcode_read_addr;
-output [15:0] dout_opcode;
-output [15:0] dout_var1;
-output [15:0] dout_var2;
+output reg [15:0] dout_opcode;
+output reg [15:0] dout_var1;
+output reg [15:0] dout_var2;
 input [11:0] write_addr;
 input [15:0] write_value;
 input write_en;
 
 (* ram_style = "block" *) reg [15:0] RAM [32767:0];
-reg [15:0] dout_opcode;
-reg [15:0] dout_var1;
-reg [15:0] dout_var2;
 
 initial
 begin
