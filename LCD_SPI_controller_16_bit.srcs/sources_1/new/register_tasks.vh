@@ -5,12 +5,10 @@
 // Increament PC
 // Increament r_SM_msg
 task t_copy_regs;
-    reg [3:0] reg_1;
-    reg [3:0] reg_2;
     begin
-        reg_2=w_opcode[3:0];
-        reg_1=w_opcode[7:4];
-        r_register[reg_1]<=r_register[reg_2];
+        r_reg_2=w_opcode[3:0];
+        r_reg_1=w_opcode[7:4];
+        r_register[r_reg_1]<=r_register[r_reg_2];
         r_SM<=OPCODE_REQUEST;  
         r_PC<=r_PC+1;    
     end
@@ -22,10 +20,8 @@ endtask
 // Increament r_SM_msg
 task t_set_reg;
     input [15:0] i_value; 
-    reg [3:0] reg_1;
     begin
-        reg_1=w_opcode[3:0];
-        r_register[reg_1]<=i_value;
+        r_register[r_reg_2]<=i_value;
         r_SM<=OPCODE_REQUEST;  
         r_PC<=r_PC+2;    
     end
@@ -36,10 +32,8 @@ endtask
 // Increament PC
 // Increament r_SM_msg
 task t_set_reg_flags; 
-    reg [3:0] reg_1;
     begin
-        reg_1=w_opcode[3:0];
-        r_register[reg_1]<={r_zero_flag, r_equal_flag,r_carry_flag,r_overflow_flag,12'b0};
+        r_register[r_reg_2]<={r_zero_flag, r_equal_flag,r_carry_flag,r_overflow_flag,12'b0};
         r_SM<=OPCODE_REQUEST;  
         r_PC<=r_PC+1;    
     end
@@ -52,12 +46,8 @@ endtask
 // Increament PC
 // Increament r_SM_msg
 task t_and_regs;
-    reg [3:0] reg_1;
-    reg [3:0] reg_2;
     begin
-        reg_2=w_opcode[3:0];
-        reg_1=w_opcode[7:4];
-        r_register[reg_1]<=r_register[reg_1]&r_register[reg_2];
+        r_register[r_reg_1]<=r_register[r_reg_1]&r_register[r_reg_2];
         r_SM<=OPCODE_REQUEST;  
         r_PC<=r_PC+1;    
     end
@@ -68,12 +58,8 @@ endtask
 // Increament PC
 // Increament r_SM_msg
 task t_or_regs;
-    reg [3:0] reg_1;
-    reg [3:0] reg_2;
     begin
-        reg_2=w_opcode[3:0];
-        reg_1=w_opcode[7:4];
-        r_register[reg_1]<=r_register[reg_1]|r_register[reg_2];
+        r_register[r_reg_1]<=r_register[r_reg_1]|r_register[r_reg_2];
         r_SM<=OPCODE_REQUEST;  
         r_PC<=r_PC+1;    
     end
@@ -84,18 +70,12 @@ endtask
 // Increament PC
 // Increament r_SM_msg
 task t_xor_regs;
-    reg [3:0] reg_1;
-    reg [3:0] reg_2;
     begin
-        reg_2=w_opcode[3:0];
-        reg_1=w_opcode[7:4];
-        r_register[reg_1]<=r_register[reg_1]^r_register[reg_2];
+        r_register[r_reg_1]<=r_register[r_reg_1]^r_register[r_reg_2];
         r_SM<=OPCODE_REQUEST;  
         r_PC<=r_PC+1;    
     end
 endtask 
-
-
 
 // AND first reg with value, result in first
 // On completion
@@ -103,10 +83,8 @@ endtask
 // Increament r_SM_msg
 task t_and_reg_value;
     input [15:0] i_value;
-    reg [3:0] reg_1;
     begin
-        reg_1=w_opcode[3:0];
-        r_register[reg_1]<=r_register[reg_1]&i_value;
+        r_register[r_reg_2]<=r_register[r_reg_2]&i_value;
         r_SM<=OPCODE_REQUEST;  
         r_PC<=r_PC+2;    
     end
@@ -118,10 +96,8 @@ endtask
 // Increament r_SM_msg
 task t_or_reg_value;
     input [15:0] i_value;
-    reg [3:0] reg_1;
     begin
-        reg_1=w_opcode[3:0];
-        r_register[reg_1]<=r_register[reg_1]|i_value;
+        r_register[r_reg_2]<=r_register[r_reg_2]|i_value;
         r_SM<=OPCODE_REQUEST;  
         r_PC<=r_PC+2;    
     end
@@ -133,10 +109,8 @@ endtask
 // Increament r_SM_msg
 task t_xor_reg_value;
     input [15:0] i_value;
-    reg [3:0] reg_1;
     begin
-        reg_1=w_opcode[3:0];
-        r_register[reg_1]<=r_register[reg_1]^i_value;
+        r_register[r_reg_2]<=r_register[r_reg_2]^i_value;
         r_SM<=OPCODE_REQUEST;  
         r_PC<=r_PC+2;    
     end
@@ -151,14 +125,12 @@ endtask
  // Update zero, carry
  task t_add_value;
     input [15:0] i_value; 
-    reg [3:0] reg_1; 
     reg [15:0] hold;
     begin
-        reg_1=w_opcode[3:0];
-        r_zero_flag <= r_register[reg_1]+i_value==0 ? 1'b1 : 1'b0;
-        {r_carry_flag,hold} = {1'b0,r_register[reg_1]}+{1'b0,i_value};
-        r_overflow_flag = (r_register[reg_1][15]&&i_value[15]&&!hold[15])||(!r_register[reg_1][15]&&!i_value[15]&&hold[15]) ? 1'b1 : 1'b0;
-        r_register[reg_1]<= hold;      
+        {r_carry_flag,hold} = {1'b0,r_register[r_reg_2]}+{1'b0,i_value};
+        r_zero_flag <= hold==0 ? 1'b1 : 1'b0;
+        r_overflow_flag = (r_register[r_reg_2][15]&&i_value[15]&&!hold[15])||(!r_register[r_reg_2][15]&&!i_value[15]&&hold[15]) ? 1'b1 : 1'b0;
+        r_register[r_reg_2]<= hold;      
         r_SM<=OPCODE_REQUEST;  
         r_PC<=r_PC+2;         
         
@@ -171,14 +143,12 @@ endtask
 // Increament r_SM_msg
  task t_minus_value;
     input [15:0] i_value; 
-    reg [3:0] reg_1; 
     reg [15:0] hold;
     begin
-        reg_1=w_opcode[3:0];
-        r_zero_flag <= r_register[reg_1]-i_value==0 ? 1'b1 : 1'b0;
-        {r_carry_flag,hold} = {1'b0,r_register[reg_1]}-{1'b0,i_value};
-        r_overflow_flag = (r_register[reg_1][15]&&!i_value[15]&&!hold[15])||(!r_register[reg_1][15]&&i_value[15]&&hold[15]) ? 1'b1 : 1'b0;
-        r_register[reg_1]<= hold;      
+        {r_carry_flag,hold} = {1'b0,r_register[r_reg_2]}-{1'b0,i_value};
+        r_zero_flag <= hold==0 ? 1'b1 : 1'b0;
+        r_overflow_flag = (r_register[r_reg_2][15]&&!i_value[15]&&!hold[15])||(!r_register[r_reg_2][15]&&i_value[15]&&hold[15]) ? 1'b1 : 1'b0;
+        r_register[r_reg_2]<= hold;      
         r_SM<=OPCODE_REQUEST;  
         r_PC<=r_PC+2;   
     end
@@ -188,15 +158,13 @@ endtask
 // On completion
 // Increament PC
 // Increament r_SM_msg
-task t_dec_reg;  
-    reg [3:0] reg_1; 
+task t_dec_reg;   
     reg [15:0] hold;
     begin
-        reg_1=w_opcode[3:0];
-        r_zero_flag <= r_register[reg_1]-1==0 ? 1'b1 : 1'b0;
-        {r_carry_flag,hold} = {1'b0,r_register[reg_1]}-{17'b1};
-        r_overflow_flag = (r_register[reg_1][15]&&!hold[15]) ? 1'b1 : 1'b0;
-        r_register[reg_1]<= hold;
+        {r_carry_flag,hold} = {1'b0,r_register[r_reg_2]}-{17'b1};
+        r_zero_flag <= hold==0 ? 1'b1 : 1'b0;
+        r_overflow_flag = (r_register[r_reg_2][15]&&!hold[15]) ? 1'b1 : 1'b0;
+        r_register[r_reg_2]<= hold;
         r_SM<=OPCODE_REQUEST;  
         r_PC<=r_PC+1; 
     end
@@ -207,14 +175,12 @@ endtask
 // Increament PC
 // Increment r_SM_msg
 task t_inc_reg;  
-    reg [3:0] reg_1; 
     reg [15:0] hold;
     begin
-        reg_1=w_opcode[3:0];
-        r_zero_flag <= r_register[reg_1]-1==0 ? 1'b1 : 1'b0;
-        {r_carry_flag,hold} = {1'b0,r_register[reg_1]}-{17'b1};
-        r_overflow_flag = (!r_register[reg_1][15]&&hold[15]) ? 1'b1 : 1'b0;
-        r_register[reg_1]<= hold;
+        {r_carry_flag,hold} = {1'b0,r_register[r_reg_2]}-{17'b1};
+        r_zero_flag <= hold==0 ? 1'b1 : 1'b0;
+        r_overflow_flag = (!r_register[r_reg_2][15]&&hold[15]) ? 1'b1 : 1'b0;
+        r_register[r_reg_2]<= hold;
         r_SM<=OPCODE_REQUEST;  
         r_PC<=r_PC+1;
     end
@@ -225,11 +191,9 @@ endtask
 // Increment PC 2
 // Increment r_SM_msg
  task t_compare_reg_value;
-    input [15:0] i_value;  
-    reg [3:0] reg_1; 
+    input [15:0] i_value;   
     begin
-        reg_1=w_opcode[3:0];
-        r_equal_flag <= r_register[reg_1]==i_value ? 1'b1 : 1'b0;
+        r_equal_flag <= r_register[r_reg_2]==i_value ? 1'b1 : 1'b0;
         r_SM<=OPCODE_REQUEST;  
         r_PC<=r_PC+2; 
     end
@@ -240,16 +204,13 @@ endtask
 // Increment PC
 // Increment r_SM_msg
 task t_add_regs;
-    reg [3:0] reg_1;
-    reg [3:0] reg_2;
     reg [15:0] hold;
     begin
-        reg_2=w_opcode[3:0];
-        reg_1=w_opcode[7:4];  
-        r_zero_flag <= r_register[reg_1]+r_register[reg_2]==0 ? 1'b1 : 1'b0;
-        {r_carry_flag,hold} = {1'b0,r_register[reg_1]}+{1'b0,r_register[reg_2]};
-        r_overflow_flag = (r_register[reg_1][15]&&r_register[reg_2][15]&&!hold[15])||(!r_register[reg_1][15]&&!r_register[reg_2][15]&&hold[15]) ? 1'b1 : 1'b0;
-        r_register[reg_1]<= hold;
+
+        {r_carry_flag,hold} = {1'b0,r_register[r_reg_1]}+{1'b0,r_register[r_reg_2]};
+        r_zero_flag <= hold==0 ? 1'b1 : 1'b0;
+        r_overflow_flag = (r_register[r_reg_1][15]&&r_register[r_reg_2][15]&&!hold[15])||(!r_register[r_reg_1][15]&&!r_register[r_reg_2][15]&&hold[15]) ? 1'b1 : 1'b0;
+        r_register[r_reg_1]<= hold;
         
         r_SM<=OPCODE_REQUEST;  
         r_PC<=r_PC+1;  
@@ -262,16 +223,12 @@ endtask
 // Increment PC
 // Increment r_SM_msg
 task t_minus_regs;
-    reg [3:0] reg_1;
-    reg [3:0] reg_2;
     reg [15:0] hold;
     begin
-        reg_2=w_opcode[3:0];
-        reg_1=w_opcode[7:4];  
-        r_zero_flag <= r_register[reg_1]-r_register[reg_2]==0 ? 1'b1 : 1'b0;
-        {r_carry_flag,hold} = {1'b0,r_register[reg_1]}-{1'b0,r_register[reg_2]};
-        r_overflow_flag = (r_register[reg_1][15]&&!r_register[reg_2][15]&&!hold[15])||(!r_register[reg_1][15]&&r_register[reg_2][15]&&hold[15]) ? 1'b1 : 1'b0;
-        r_register[reg_1]<= hold;
+        {r_carry_flag,hold} = {1'b0,r_register[r_reg_1]}-{1'b0,r_register[r_reg_2]};
+        r_zero_flag <= hold==0 ? 1'b1 : 1'b0;
+        r_overflow_flag = (r_register[r_reg_1][15]&&!r_register[r_reg_2][15]&&!hold[15])||(!r_register[r_reg_1][15]&&r_register[r_reg_2][15]&&hold[15]) ? 1'b1 : 1'b0;
+        r_register[r_reg_1]<= hold;
         
         r_SM<=OPCODE_REQUEST;  
         r_PC<=r_PC+1;      
@@ -283,10 +240,8 @@ endtask
 // Increment PC 1
 // Increment r_SM_msg
  task t_negate_reg;  
-    reg [3:0] reg_1; 
     begin
-        reg_1=w_opcode[3:0];
-        r_register[reg_1]<=~r_register[reg_1]+1;
+        r_register[r_reg_2]<=~r_register[r_reg_2]+1;
         r_SM<=OPCODE_REQUEST;  
         r_PC<=r_PC+1; 
     end
@@ -297,12 +252,8 @@ endtask
 // Increment PC 2
 // Increment r_SM_msg
  task t_compare_regs;  
-    reg [3:0] reg_1; 
-    reg [3:0] reg_2;
     begin
-        reg_2=w_opcode[3:0];
-        reg_1=w_opcode[7:4];
-        r_equal_flag <= r_register[reg_1]==r_register[reg_2] ? 1'b1 : 1'b0;
+        r_equal_flag <= r_register[r_reg_1]==r_register[r_reg_2] ? 1'b1 : 1'b0;
         r_SM<=OPCODE_REQUEST;  
         r_PC<=r_PC+2; 
     end

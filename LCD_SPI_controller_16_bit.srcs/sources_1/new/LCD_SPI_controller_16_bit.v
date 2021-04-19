@@ -27,7 +27,7 @@ module LCD_SPI_controller_16_bit(
            input                i_uart_rx,
            input                i_load_H,   // Load button
            output               o_uart_tx,
-           output       [15:0]  o_led,
+           output  reg  [15:0]  o_led,
            output               o_SPI_LCD_Clk,
            input                i_SPI_LCD_MISO,
            output               o_SPI_LCD_MOSI,
@@ -65,12 +65,18 @@ reg  [31:0]  r_timeout_max;
 // Machine control
 reg  [15:0]  r_SM;;
 reg  [14:0]  r_PC;
+reg  [14:0]  r_mem_read_addr;
 wire [15:0]  w_opcode;
 wire [15:0]  w_var1;
 wire [15:0]  w_var2;
+wire [15:0]  w_mem;
+wire         w_dout_opcode_exec;
+reg  [3:0]   r_reg_1;
+reg  [3:0]   r_reg_2;
 
 //load control
 reg          o_ram_write_DV;
+reg          o_ram_write_exec;
 reg  [15:0]  o_ram_write_value;
 reg  [11:0]  o_ram_write_addr;
 reg  [11:0]  r_ram_next_write_addr;
@@ -105,10 +111,6 @@ reg [7:0]   r_msg_length;
 reg         r_msg_send_DV;
 wire        i_msg_sent_DV;
 wire        i_sending_msg;
-
-// LED control
-reg [15:0]  r_led;
- 
  
 uart_send_msg  uart_send_msg1 (
                 .i_Clk(i_Clk),
@@ -118,14 +120,20 @@ uart_send_msg  uart_send_msg1 (
                 .o_Tx_Serial(o_uart_tx),
                 .o_msg_sent_DV(i_msg_sent_DV),
                 .o_sending_msg(i_sending_msg)); 
-                
+         
+   
+ uart_rx uart_rx1 (
+                .i_Clock(i_Clk),
+                .i_Rx_Serial(i_uart_rx),
+                .o_Rx_DV(w_uart_rx_DV),
+                .o_Rx_Byte(w_uart_rx_value));
  
-uart_receive uart_receive1(
+/*uart_receive uart_receive1(
                  .i_clk(i_Clk), //input clock
                  .i_Rst_H(i_Rst_H), //input reset
                  .i_RxD(i_uart_rx), //input receving data line
                  .o_Rx_data(w_uart_rx_value), // output for 8 bits data
-                 .o_Rx_DV(w_uart_rx_DV));
+                 .o_Rx_DV(w_uart_rx_DV));*/
 
 stack main_stack (
           .clk(i_Clk),
@@ -164,17 +172,21 @@ SPI_Master_With_Single_CS SPI_Master_With_Single_CS_inst (
                               .o_SPI_CS_n(o_SPI_LCD_CS_n));
 
 rams_sp_nc rams_sp_nc1 (
-               .clk(i_Clk),
-               .opcode_read_addr(r_PC),
-               .dout_opcode(w_opcode),
-               .dout_var1(w_var1),
-               .dout_var2(w_var2),
-               .write_addr(o_ram_write_addr),
-               .write_value(o_ram_write_value),
-               .write_en(o_ram_write_DV)
+               .i_clk(i_Clk),
+               .i_opcode_read_addr(r_PC),
+               .i_mem_read_addr(r_mem_read_addr),
+               .o_dout_opcode(w_opcode),
+               .o_dout_opcode_exec(w_dout_opcode_exec),
+               .o_dout_mem(w_mem),
+               .o_dout_var1(w_var1),
+               .o_dout_var2(w_var2),
+               .i_write_addr(o_ram_write_addr),
+               .i_write_value(o_ram_write_value),
+               .i_write_en_exec(o_ram_write_exec),
+               .i_write_en(o_ram_write_DV)
            );
 
-/* ila_0  myila(.clk(i_Clk),
+ /*ila_0  myila(.clk(i_Clk),
  .probe0(w_opcode),
  .probe1(r_check_number),
  .probe2(r_PC),
@@ -183,8 +195,8 @@ rams_sp_nc rams_sp_nc1 (
  .probe5(o_TX_LCD_Byte),
  .probe6(8'b0),
  .probe7(r_register[0]),
- .probe8(o_SPI_LCD_Clk),
- .probe9(i_SPI_LCD_MISO),
+ .probe8(r_reg_1),
+ .probe9(r_reg_2),
  .probe10(o_SPI_LCD_MOSI),
  .probe11(o_SPI_LCD_CS_n),
  .probe12(o_LCD_DC),
@@ -218,7 +230,6 @@ begin
     r_error_code=8'h0;
     r_timeout_counter=32'b0;
     r_seven_seg_value=32'h20_10_00_05;
-    r_led=16'h0;
     rx_count=8'b0;
     o_ram_write_addr=12'h0;
     r_ram_next_write_addr=12'h0;
@@ -265,6 +276,7 @@ begin
             begin
                 o_ram_write_DV<=1'b0;
                 r_stack_reset<=1'b1;
+                o_ram_write_exec<=1'b1;
                 r_seven_seg_value<={8'h24,4'h0,r_ram_next_write_addr[11:8],4'h0,r_ram_next_write_addr[7:4],4'h0,r_ram_next_write_addr[3:0]};
                 if (w_uart_rx_DV)
                 begin
@@ -364,6 +376,8 @@ begin
             
             OPCODE_FETCH:
             begin
+                r_reg_2=w_opcode[3:0];
+                r_reg_1=w_opcode[7:4];
                 r_SM<=OPCODE_EXECUTE;
             end
                         
@@ -457,7 +471,5 @@ begin
         endcase // case(r_SM)
     end // else if (i_Rst_H)
 end // always @(posedge i_Clk)
-
-assign o_led=r_led;
 
 endmodule

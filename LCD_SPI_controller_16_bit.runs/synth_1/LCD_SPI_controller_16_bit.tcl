@@ -71,7 +71,6 @@ proc create_report { reportName command } {
 }
 OPTRACE "synth_1" START { ROLLUP_AUTO }
 set_param chipscope.maxJobs 1
-set_param xicom.use_bs_reader 1
 set_msg_config  -string {{HW Target shutdown}}  -suppress 
 OPTRACE "Creating in-memory project" START { }
 create_project -in_memory -part xc7a35tcpg236-1
@@ -105,7 +104,7 @@ read_verilog -library xil_defaultlib {
   /home/graham/Documents/LCD_SPI_controller_16_bit/LCD_SPI_controller_16_bit.srcs/sources_1/imports/new/SPI_Master_With_Single_CS.v
   /home/graham/Documents/LCD_SPI_controller_16_bit/LCD_SPI_controller_16_bit.srcs/sources_1/new/ram_sp.v
   /home/graham/Documents/LCD_SPI_controller_16_bit/LCD_SPI_controller_16_bit.srcs/sources_1/new/stack.v
-  /home/graham/Documents/LCD_SPI_controller_16_bit/LCD_SPI_controller_16_bit.srcs/sources_1/new/uart_receive.v
+  /home/graham/Documents/LCD_SPI_controller_16_bit/LCD_SPI_controller_16_bit.srcs/sources_1/new/uart_rx.v
   /home/graham/Documents/LCD_SPI_controller_16_bit/LCD_SPI_controller_16_bit.srcs/sources_1/new/uart_send_msg.v
   /home/graham/Documents/LCD_SPI_controller_16_bit/LCD_SPI_controller_16_bit.srcs/sources_1/new/uart_transmit.v
   /home/graham/Documents/LCD_SPI_controller_16_bit/LCD_SPI_controller_16_bit.srcs/sources_1/new/LCD_SPI_controller_16_bit.v
@@ -126,7 +125,7 @@ set_param ips.enableIPCacheLiteLoad 1
 close [open __synthesis_is_running__ w]
 
 OPTRACE "synth_design" START { }
-synth_design -top LCD_SPI_controller_16_bit -part xc7a35tcpg236-1
+synth_design -top LCD_SPI_controller_16_bit -part xc7a35tcpg236-1 -flatten_hierarchy none
 OPTRACE "synth_design" END { }
 if { [get_msg_config -count -severity {CRITICAL WARNING}] > 0 } {
  send_msg_id runtcl-6 info "Synthesis results are not added to the cache due to CRITICAL_WARNING"

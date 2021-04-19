@@ -38,8 +38,6 @@ r_SM_Main=s_IDLE;
 end
   
 
-   
-  // Purpose: Toggle LED output when w_Switch_1 is released.
 always @(posedge i_Clk)
 begin
      

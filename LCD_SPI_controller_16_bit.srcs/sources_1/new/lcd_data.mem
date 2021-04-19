@@ -20,6 +20,7 @@ F013 FFFF           //DELAYV 0xFFFF
 1000 0000           //JMP LOOP1:
 
 
+
 // Code sample for LCD control
 //START:
 2005 0000           //LCDRSET 0

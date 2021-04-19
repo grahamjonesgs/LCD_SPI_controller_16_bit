@@ -1,30 +1,37 @@
-module rams_sp_nc (clk, opcode_read_addr, dout_opcode, dout_var1,dout_var2, write_en, write_addr, write_value);
+module rams_sp_nc (
 
-input clk;
+    input               i_clk,
+    input       [14:0]  i_opcode_read_addr,
+    input       [14:0]  i_mem_read_addr, 
+    output reg  [15:0]  o_dout_opcode,
+    output reg          o_dout_opcode_exec,
+    output reg  [15:0]  o_dout_mem,
+    output reg  [15:0]  o_dout_var1,
+    output reg  [15:0]  o_dout_var2,
+    input       [11:0]  i_write_addr,
+    input       [15:0]  i_write_value,
+    input               i_write_en_exec,
+    input               i_write_en
+    );
 
-input [14:0] opcode_read_addr;
-output reg [15:0] dout_opcode;
-output reg [15:0] dout_var1;
-output reg [15:0] dout_var2;
-input [11:0] write_addr;
-input [15:0] write_value;
-input write_en;
 
-(* ram_style = "block" *) reg [15:0] RAM [32767:0];
+(* ram_style = "block" *) reg [16:0] RAM [32767:0];
 
 initial
 begin
     $readmemh("lcd_data.mem",RAM);
 end
 
-always @(posedge clk)
+always @(posedge i_clk)
 begin
-    dout_opcode <= RAM[opcode_read_addr];
-    dout_var1 <= RAM[opcode_read_addr+1];
-    dout_var2 <= RAM[opcode_read_addr+2];
-    if (write_en)
+    o_dout_opcode <= RAM[i_opcode_read_addr][15:0];
+    o_dout_opcode_exec <= RAM[i_opcode_read_addr][16];
+    o_dout_mem <= RAM[i_mem_read_addr][15:0];
+    o_dout_var1 <= RAM[i_opcode_read_addr+1][15:0];
+    o_dout_var2 <= RAM[i_opcode_read_addr+2][15:0];
+    if (i_write_en)
     begin
-        RAM[write_addr] <= write_value;
+        RAM[i_write_addr] <= {i_write_en_exec,i_write_value};
     end
 end
 endmodule
