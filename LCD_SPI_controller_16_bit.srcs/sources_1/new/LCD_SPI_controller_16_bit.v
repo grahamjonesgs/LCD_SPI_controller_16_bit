@@ -86,7 +86,7 @@ reg  [15:0]  r_checksum;
 reg  [15:0]  r_old_checksum;
 
 // Register control
-reg  [15:0]  r_register[15:0];
+(* ram_style = "block" *) reg  [15:0]  r_register[15:0];
 reg          r_zero_flag;
 reg          r_equal_flag;
 reg          r_carry_flag;
@@ -127,13 +127,6 @@ uart_send_msg  uart_send_msg1 (
                 .i_Rx_Serial(i_uart_rx),
                 .o_Rx_DV(w_uart_rx_DV),
                 .o_Rx_Byte(w_uart_rx_value));
- 
-/*uart_receive uart_receive1(
-                 .i_clk(i_Clk), //input clock
-                 .i_Rst_H(i_Rst_H), //input reset
-                 .i_RxD(i_uart_rx), //input receving data line
-                 .o_Rx_data(w_uart_rx_value), // output for 8 bits data
-                 .o_Rx_DV(w_uart_rx_DV));*/
 
 stack main_stack (
           .clk(i_Clk),

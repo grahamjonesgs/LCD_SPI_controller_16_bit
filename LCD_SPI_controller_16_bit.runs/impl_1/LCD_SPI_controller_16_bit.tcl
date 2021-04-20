@@ -138,7 +138,7 @@ OPTRACE "set parameters" END { }
 OPTRACE "add files" START { }
   add_files -quiet /home/graham/Documents/LCD_SPI_controller_16_bit/LCD_SPI_controller_16_bit.runs/synth_1/LCD_SPI_controller_16_bit.dcp
 OPTRACE "read constraints: implementation" START { }
-  read_xdc /home/graham/Documents/LCD_SPI_controller_16_bit/LCD_SPI_controller_16_bit.srcs/constrs_1/imports/imports/new/Basys.xdc
+  read_xdc /home/graham/Documents/LCD_SPI_controller_16_bit/LCD_SPI_controller_16_bit.srcs/constrs_1/new/Basys.xdc
 OPTRACE "read constraints: implementation" END { }
 OPTRACE "add files" END { }
 OPTRACE "link_design" START { }
